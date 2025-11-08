@@ -35,6 +35,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install black flake8 mypy pytest pytest-cov pytest-asyncio
+        pip install -e .
 
     - name: Check code formatting with black
       run: |
