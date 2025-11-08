@@ -56,7 +56,7 @@ jobs:
     - name: Run tests with pytest
       run: |
         # Run tests in mock mode (no KiCad required)
-        pytest test_server.py test_fabrication.py -v --cov=. --cov-report=xml --cov-report=term
+        pytest -v
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
