@@ -4,7 +4,9 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![KiCad 9.0+](https://img.shields.io/badge/KiCad-9.0+-blue.svg)](https://www.kicad.org/)
 [![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](https://github.com/Pablomonte/MCP-KiCad/releases/tag/v1.0.0)
-[![Tests](https://img.shields.io/badge/tests-20%2F20%20passing-brightgreen.svg)](#testing)
+[![CI/CD](https://github.com/Pablomonte/MCP-KiCad/actions/workflows/ci.yml/badge.svg)](https://github.com/Pablomonte/MCP-KiCad/actions)
+[![Tests](https://img.shields.io/badge/tests-135%20passing-brightgreen.svg)](#testing)
+[![Coverage](https://img.shields.io/badge/coverage-43%25-yellow.svg)](#testing)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 AI-assisted KiCad PCB design using Model Context Protocol (MCP) and Anthropic Claude.
@@ -91,7 +93,7 @@ Get your API key from: https://console.anthropic.com/
 Run the server using:
 
 ```bash
-./run_with_flatpak.sh  # Uses extended server (12 tools) by default
+./run_with_flatpak.sh  # Uses extended server (13 tools) by default
 ```
 
 ### Method 2: Native Python (Advanced)
@@ -114,7 +116,11 @@ venv\Scripts\activate  # On Windows
 #### Step 5: Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+# Install the package in editable mode
+pip install -e .
+
+# For development (includes testing tools)
+pip install -e .[dev]
 ```
 
 #### Step 6: Setup KiCad Python Environment
@@ -160,7 +166,7 @@ Make sure the PCB editor (PCBNew) is open, not just the project manager.
 
 ### 2. Run the MCP Server
 
-Choose between basic server (4 tools) or extended server (12 tools, recommended):
+Choose between basic server (4 tools) or extended server (13 tools, recommended):
 
 **With Flatpak (Recommended):**
 
@@ -257,7 +263,7 @@ The project includes two MCP server variants:
 | Feature | Basic Server | Extended Server |
 |---------|-------------|----------------|
 | Script | `kicad_mcp_server.py` | `kicad_mcp_server_extended.py` |
-| Tool Count | 4 tools | 12 tools |
+| Tool Count | 4 tools | 13 tools |
 | Use Case | Component placement & queries | Full fabrication workflow |
 | Recommended | Testing & learning | Production use |
 
@@ -289,7 +295,7 @@ Get general information about the PCB.
 
 **Returns**: Board size, layer count, component count, filename
 
-### Extended Server Additional Tools (8 more tools)
+### Extended Server Additional Tools (9 more tools)
 
 The extended server adds these fabrication and verification tools:
 
@@ -349,7 +355,7 @@ Run Design Rule Check on the PCB.
 
 **Returns**: DRC status, error count, warning count
 
-#### Layout Tools (2 tools)
+#### Layout Tools (3 tools)
 
 ##### fill_zones
 Fill copper zones on the PCB.
@@ -367,6 +373,14 @@ Get information about tracks/traces on the PCB.
 
 **Returns**: Track count, total length, layer distribution
 
+##### update_from_schematic
+Import/update components from schematic file to PCB board.
+
+**Parameters**:
+- `schematic_path` (string, optional): Path to .kicad_sch file (auto-detected if not provided)
+
+**Returns**: Status, component count, schematic and PCB file paths
+
 ## Available Resources
 
 ### board://schematic
@@ -374,6 +388,9 @@ JSON list of all components from the board schematic
 
 ### board://info
 General PCB board information and settings
+
+### board://nets
+JSON list of all nets (electrical connections) on the board
 
 ## Available Prompts
 
@@ -389,13 +406,31 @@ Get AI-powered layout guidance for simple circuits.
 
 ```
 MCP-KiCad/
-├── kicad_mcp_server.py      # MCP server exposing KiCad tools
-├── kicad_mcp_client.py      # AI client using Claude
-├── requirements.txt          # Python dependencies
-├── .env.example             # Example environment configuration
-├── .env                     # Your API keys (not in git)
-├── .gitignore              # Git ignore rules
-└── README.md               # This file
+├── src/
+│   └── mcp_kicad/
+│       ├── __init__.py
+│       ├── server/
+│       │   ├── basic.py         # Basic MCP server (4 tools)
+│       │   └── extended.py      # Extended MCP server (13 tools)
+│       ├── client/
+│       │   └── claude.py        # Claude AI client implementation
+│       └── schemas/
+│           └── tools.py         # Tool input/output schemas
+├── tests/
+│   ├── test_server.py          # Server unit tests
+│   ├── test_fabrication.py     # Fabrication tools tests
+│   └── ...                     # Additional test files
+├── kicad_mcp_server.py         # Basic server (legacy/direct)
+├── kicad_mcp_server_extended.py # Extended server (legacy/direct)
+├── kicad_mcp_client.py         # AI client (legacy/direct)
+├── pyproject.toml              # Project configuration
+├── requirements.txt            # Python dependencies
+├── .env.example               # Example environment configuration
+├── .env                       # Your API keys (not in git)
+├── .github/
+│   └── workflows/
+│       └── ci.yml             # GitHub Actions CI/CD
+└── README.md                  # This file
 ```
 
 ## Known Limitations
@@ -563,6 +598,31 @@ logger = logging.getLogger(__name__)
 - Document functions with docstrings
 - Handle errors gracefully
 
+## Testing
+
+The project includes comprehensive test coverage with 135+ unit tests:
+
+```bash
+# Run tests locally
+pip install -e .[dev]
+pytest
+
+# Run with coverage report
+pytest --cov=src/mcp_kicad --cov-report=term-missing
+
+# Run specific test files
+pytest tests/test_server.py
+pytest tests/test_fabrication.py
+```
+
+### CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration:
+- **Python Versions**: Tests run on Python 3.10, 3.11, and 3.12
+- **Code Quality**: Black formatting and flake8 linting enforced
+- **Coverage**: Minimum 40% coverage threshold required
+- **Security**: Safety check for vulnerable dependencies
+
 ## Contributing
 
 Contributions welcome! Areas for improvement:
@@ -598,7 +658,7 @@ For issues, questions, or suggestions:
 Built using:
 - KiCad Python API (pcbnew)
 - Anthropic's Model Context Protocol
-- Claude 3.5 Sonnet
+- Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 - Python asyncio
 
 ---
