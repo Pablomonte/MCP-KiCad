@@ -20,31 +20,29 @@ from mcp_kicad.config import get_settings
 
 
 # Context variable for correlation ID
-correlation_id: ContextVar[Optional[str]] = ContextVar('correlation_id', default=None)
-operation_id: ContextVar[Optional[str]] = ContextVar('operation_id', default=None)
+correlation_id: ContextVar[Optional[str]] = ContextVar("correlation_id", default=None)
+operation_id: ContextVar[Optional[str]] = ContextVar("operation_id", default=None)
 
 
 class CorrelationIdFilter(logging.Filter):
     """Add correlation ID and operation ID to standard logging records."""
 
     def filter(self, record: logging.LogRecord) -> bool:
-        record.correlation_id = correlation_id.get() or 'no-correlation-id'
-        record.operation_id = operation_id.get() or 'no-operation-id'
+        record.correlation_id = correlation_id.get() or "no-correlation-id"
+        record.operation_id = operation_id.get() or "no-operation-id"
         return True
 
 
 def add_correlation_id(
-    logger: logging.Logger,
-    method_name: str,
-    event_dict: Dict[str, Any]
+    logger: logging.Logger, method_name: str, event_dict: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
     Add correlation ID and operation ID to event dict.
 
     This processor adds tracking IDs to every log event for request correlation.
     """
-    event_dict['correlation_id'] = correlation_id.get() or 'no-correlation-id'
-    event_dict['operation_id'] = operation_id.get() or 'no-operation-id'
+    event_dict["correlation_id"] = correlation_id.get() or "no-correlation-id"
+    event_dict["operation_id"] = operation_id.get() or "no-operation-id"
     return event_dict
 
 
@@ -95,7 +93,8 @@ def setup_logging(
 
     # Configure structlog
     structlog.configure(
-        processors=shared_processors + [
+        processors=shared_processors
+        + [
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         wrapper_class=structlog.make_filtering_bound_logger(numeric_level),
@@ -130,7 +129,7 @@ def setup_logging(
             log_file,
             maxBytes=settings.log_rotation_mb * 1024 * 1024,  # MB to bytes
             backupCount=settings.log_retention_days,
-            encoding='utf-8',
+            encoding="utf-8",
         )
         file_handler.setFormatter(formatter)
         file_handler.addFilter(CorrelationIdFilter())
@@ -226,7 +225,7 @@ class OperationContext:
         self.start_time: Optional[datetime] = None
         self.op_id = str(uuid.uuid4())[:8]
 
-    def __enter__(self) -> 'OperationContext':
+    def __enter__(self) -> "OperationContext":
         """Start operation tracking."""
         operation_id.set(self.op_id)
         self.start_time = datetime.now()

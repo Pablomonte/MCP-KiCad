@@ -18,11 +18,11 @@ from mcp_kicad.config import Settings, get_settings, reload_settings
 # BASIC SETTINGS TESTS
 # ============================================================================
 
+
 def test_settings_default_values():
     """Test Settings with default values"""
     settings = Settings(
-        log_to_file=False,  # Disable file logging for tests
-        log_to_console=False
+        log_to_file=False, log_to_console=False  # Disable file logging for tests
     )
 
     assert settings.server_name == "kicad-mcp-server"
@@ -40,7 +40,7 @@ def test_settings_custom_values():
         kicad_version="8.0",
         max_concurrent_operations=5,
         log_to_file=False,
-        log_to_console=False
+        log_to_console=False,
     )
 
     assert settings.server_name == "my-server"
@@ -51,6 +51,7 @@ def test_settings_custom_values():
 # ============================================================================
 # ENVIRONMENT VARIABLE TESTS
 # ============================================================================
+
 
 def test_settings_from_env(monkeypatch):
     """Test Settings loads from environment variables"""
@@ -81,36 +82,26 @@ def test_settings_env_prefix(monkeypatch):
 # LOG LEVEL VALIDATION TESTS
 # ============================================================================
 
+
 def test_log_level_validation_valid():
     """Test valid log levels"""
     valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
     for level in valid_levels:
-        settings = Settings(
-            log_level=level,
-            log_to_file=False,
-            log_to_console=False
-        )
+        settings = Settings(log_level=level, log_to_file=False, log_to_console=False)
         assert settings.log_level == level.upper()
 
 
 def test_log_level_validation_case_insensitive():
     """Test log level is case-insensitive"""
-    settings = Settings(
-        log_level="debug",
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(log_level="debug", log_to_file=False, log_to_console=False)
     assert settings.log_level == "DEBUG"
 
 
 def test_log_level_validation_invalid():
     """Test invalid log level raises error"""
     with pytest.raises(ValidationError) as exc_info:
-        Settings(
-            log_level="INVALID",
-            log_to_file=False
-        )
+        Settings(log_level="INVALID", log_to_file=False)
 
     assert "Invalid log level" in str(exc_info.value)
 
@@ -119,14 +110,13 @@ def test_log_level_validation_invalid():
 # PATH VALIDATION TESTS
 # ============================================================================
 
+
 def test_path_expansion(tmp_path, monkeypatch):
     """Test that paths are expanded and resolved"""
     monkeypatch.setenv("HOME", str(tmp_path))
 
     settings = Settings(
-        project_path=Path("~/test"),
-        log_to_file=False,
-        log_to_console=False
+        project_path=Path("~/test"), log_to_file=False, log_to_console=False
     )
 
     # Path should be expanded and absolute
@@ -139,11 +129,7 @@ def test_path_creation(tmp_path):
     new_dir = tmp_path / "new_project_dir"
     assert not new_dir.exists()
 
-    settings = Settings(
-        project_path=new_dir,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(project_path=new_dir, log_to_file=False, log_to_console=False)
 
     # Directory should be created
     assert settings.project_path.exists()
@@ -152,11 +138,7 @@ def test_path_creation(tmp_path):
 
 def test_export_base_dir_default(tmp_path):
     """Test export_base_dir default value"""
-    settings = Settings(
-        project_path=tmp_path,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(project_path=tmp_path, log_to_file=False, log_to_console=False)
 
     # Should create exports directory
     assert "exports" in str(settings.export_base_dir)
@@ -164,11 +146,7 @@ def test_export_base_dir_default(tmp_path):
 
 def test_screenshot_dir_default(tmp_path):
     """Test screenshot_dir default value"""
-    settings = Settings(
-        project_path=tmp_path,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(project_path=tmp_path, log_to_file=False, log_to_console=False)
 
     # Should create screenshots directory
     assert "screenshots" in str(settings.screenshot_dir)
@@ -178,20 +156,17 @@ def test_screenshot_dir_default(tmp_path):
 # NUMERIC RANGE VALIDATION TESTS
 # ============================================================================
 
+
 def test_max_concurrent_operations_range():
     """Test max_concurrent_operations range validation"""
     # Valid values
     settings = Settings(
-        max_concurrent_operations=1,
-        log_to_file=False,
-        log_to_console=False
+        max_concurrent_operations=1, log_to_file=False, log_to_console=False
     )
     assert settings.max_concurrent_operations == 1
 
     settings = Settings(
-        max_concurrent_operations=100,
-        log_to_file=False,
-        log_to_console=False
+        max_concurrent_operations=100, log_to_file=False, log_to_console=False
     )
     assert settings.max_concurrent_operations == 100
 
@@ -207,9 +182,7 @@ def test_operation_timeout_range():
     """Test operation_timeout_seconds range validation"""
     # Valid values
     settings = Settings(
-        operation_timeout_seconds=1,
-        log_to_file=False,
-        log_to_console=False
+        operation_timeout_seconds=1, log_to_file=False, log_to_console=False
     )
     assert settings.operation_timeout_seconds == 1
 
@@ -221,9 +194,7 @@ def test_operation_timeout_range():
 def test_max_board_size_range():
     """Test max_board_size_mm range validation"""
     settings = Settings(
-        max_board_size_mm=500.0,
-        log_to_file=False,
-        log_to_console=False
+        max_board_size_mm=500.0, log_to_file=False, log_to_console=False
     )
     assert settings.max_board_size_mm == 500.0
 
@@ -238,7 +209,7 @@ def test_screenshot_dimensions_range():
         screenshot_width=1920,
         screenshot_height=1080,
         log_to_file=False,
-        log_to_console=False
+        log_to_console=False,
     )
     assert settings.screenshot_width == 1920
     assert settings.screenshot_height == 1080
@@ -250,11 +221,7 @@ def test_screenshot_dimensions_range():
 
 def test_screenshot_quality_range():
     """Test screenshot quality range validation"""
-    settings = Settings(
-        screenshot_quality=95,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(screenshot_quality=95, log_to_file=False, log_to_console=False)
     assert settings.screenshot_quality == 95
 
     # Invalid values
@@ -265,6 +232,7 @@ def test_screenshot_quality_range():
 # ============================================================================
 # BOOLEAN SETTINGS TESTS
 # ============================================================================
+
 
 def test_boolean_settings():
     """Test boolean settings"""
@@ -280,7 +248,7 @@ def test_boolean_settings():
         enable_mock_mode=True,
         enable_caching=False,
         log_to_file=False,
-        log_to_console=False
+        log_to_console=False,
     )
 
     assert settings.use_flatpak is True
@@ -299,14 +267,15 @@ def test_boolean_settings():
 # PLATFORM DEFAULTS TESTS
 # ============================================================================
 
+
 def test_log_dir_linux(monkeypatch):
     """Test log_dir default for Linux"""
-    monkeypatch.setattr(sys, 'platform', 'linux')
+    monkeypatch.setattr(sys, "platform", "linux")
 
     settings = Settings(log_to_file=False, log_to_console=False)
 
     # Should set Linux default
-    assert '.local/share/mcp-kicad/logs' in str(settings.log_dir)
+    assert ".local/share/mcp-kicad/logs" in str(settings.log_dir)
 
 
 def test_log_dir_custom():
@@ -314,11 +283,7 @@ def test_log_dir_custom():
     custom_dir = Path("/tmp/custom_logs")
     custom_dir.mkdir(parents=True, exist_ok=True)
 
-    settings = Settings(
-        log_dir=custom_dir,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(log_dir=custom_dir, log_to_file=False, log_to_console=False)
 
     assert settings.log_dir == custom_dir
 
@@ -327,12 +292,11 @@ def test_log_dir_custom():
 # PATH SECURITY TESTS
 # ============================================================================
 
+
 def test_is_path_allowed_empty_whitelist(tmp_path):
     """Test is_path_allowed with empty whitelist (allow all)"""
     settings = Settings(
-        allowed_project_paths=[],
-        log_to_file=False,
-        log_to_console=False
+        allowed_project_paths=[], log_to_file=False, log_to_console=False
     )
 
     # Empty whitelist allows all paths
@@ -350,9 +314,7 @@ def test_is_path_allowed_with_whitelist(tmp_path):
     forbidden_dir.mkdir()
 
     settings = Settings(
-        allowed_project_paths=[allowed_dir],
-        log_to_file=False,
-        log_to_console=False
+        allowed_project_paths=[allowed_dir], log_to_file=False, log_to_console=False
     )
 
     # Path inside whitelist
@@ -370,9 +332,7 @@ def test_is_path_allowed_nested(tmp_path):
     child_dir.mkdir()
 
     settings = Settings(
-        allowed_project_paths=[parent_dir],
-        log_to_file=False,
-        log_to_console=False
+        allowed_project_paths=[parent_dir], log_to_file=False, log_to_console=False
     )
 
     # Nested path should be allowed
@@ -384,10 +344,12 @@ def test_is_path_allowed_nested(tmp_path):
 # SINGLETON TESTS
 # ============================================================================
 
+
 def test_get_settings_singleton():
     """Test get_settings returns singleton instance"""
     # Reset singleton (this is done by conftest.py fixture)
     from mcp_kicad import config
+
     config._settings = None
 
     settings1 = get_settings()
@@ -400,6 +362,7 @@ def test_get_settings_singleton():
 def test_reload_settings():
     """Test reload_settings creates new instance"""
     from mcp_kicad import config
+
     config._settings = None
 
     settings1 = get_settings()
@@ -412,6 +375,7 @@ def test_reload_settings():
 def test_reload_settings_picks_up_env_changes(monkeypatch):
     """Test reload_settings picks up environment changes"""
     from mcp_kicad import config
+
     config._settings = None
 
     monkeypatch.setenv("MCP_KICAD_SERVER_NAME", "server1")
@@ -428,6 +392,7 @@ def test_reload_settings_picks_up_env_changes(monkeypatch):
 # LOGGING CONFIGURATION TESTS
 # ============================================================================
 
+
 def test_logging_configuration():
     """Test logging-related settings"""
     settings = Settings(
@@ -436,7 +401,7 @@ def test_logging_configuration():
         log_to_console=True,
         log_json=True,
         log_rotation_mb=20,
-        log_retention_days=14
+        log_retention_days=14,
     )
 
     assert settings.log_level == "DEBUG"
@@ -449,11 +414,7 @@ def test_logging_configuration():
 
 def test_log_rotation_range():
     """Test log rotation MB range validation"""
-    settings = Settings(
-        log_rotation_mb=1,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(log_rotation_mb=1, log_to_file=False, log_to_console=False)
     assert settings.log_rotation_mb == 1
 
     with pytest.raises(ValidationError):
@@ -462,11 +423,7 @@ def test_log_rotation_range():
 
 def test_log_retention_range():
     """Test log retention days range validation"""
-    settings = Settings(
-        log_retention_days=30,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(log_retention_days=30, log_to_file=False, log_to_console=False)
     assert settings.log_retention_days == 30
 
     with pytest.raises(ValidationError):
@@ -477,6 +434,7 @@ def test_log_retention_range():
 # HISTORY SETTINGS TESTS
 # ============================================================================
 
+
 def test_history_settings():
     """Test history-related settings"""
     settings = Settings(
@@ -484,7 +442,7 @@ def test_history_settings():
         enable_undo=True,
         persist_history=True,
         log_to_file=False,
-        log_to_console=False
+        log_to_console=False,
     )
 
     assert settings.max_history_size == 100
@@ -495,11 +453,7 @@ def test_history_settings():
 
 def test_history_size_range():
     """Test max_history_size range validation"""
-    settings = Settings(
-        max_history_size=1,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(max_history_size=1, log_to_file=False, log_to_console=False)
     assert settings.max_history_size == 1
 
     with pytest.raises(ValidationError):
@@ -513,13 +467,14 @@ def test_history_size_range():
 # PERFORMANCE SETTINGS TESTS
 # ============================================================================
 
+
 def test_caching_settings():
     """Test caching-related settings"""
     settings = Settings(
         enable_caching=True,
         cache_ttl_seconds=120,
         log_to_file=False,
-        log_to_console=False
+        log_to_console=False,
     )
 
     assert settings.enable_caching is True
@@ -529,19 +484,11 @@ def test_caching_settings():
 def test_cache_ttl_range():
     """Test cache_ttl_seconds range validation"""
     # 0 means no expiration
-    settings = Settings(
-        cache_ttl_seconds=0,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(cache_ttl_seconds=0, log_to_file=False, log_to_console=False)
     assert settings.cache_ttl_seconds == 0
 
     # Max value
-    settings = Settings(
-        cache_ttl_seconds=3600,
-        log_to_file=False,
-        log_to_console=False
-    )
+    settings = Settings(cache_ttl_seconds=3600, log_to_file=False, log_to_console=False)
     assert settings.cache_ttl_seconds == 3600
 
     # Out of range
@@ -552,6 +499,7 @@ def test_cache_ttl_range():
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
+
 
 def test_settings_complete_config(tmp_path, monkeypatch):
     """Test Settings with complete configuration"""
@@ -569,7 +517,7 @@ def test_settings_complete_config(tmp_path, monkeypatch):
         enable_visual_verification=True,
         enable_debug=True,
         log_to_file=False,
-        log_to_console=False
+        log_to_console=False,
     )
 
     # Env vars override

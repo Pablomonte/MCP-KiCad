@@ -17,6 +17,7 @@ from mcp_kicad.server import KiCadMCPServerExtended
 # BASIC TOOLS
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_list_components():
     """Test list_components returns proper structure"""
@@ -62,6 +63,7 @@ async def test_place_component():
 # ============================================================================
 # FABRICATION TOOLS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_export_gerber():
@@ -158,6 +160,7 @@ async def test_export_fabrication_package_jlcpcb():
 # VERIFICATION TOOLS
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_run_drc_all():
     """Test DRC with all severity levels"""
@@ -181,6 +184,7 @@ async def test_run_drc_error_only():
 # ============================================================================
 # LAYOUT TOOLS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_fill_zones_all():
@@ -224,6 +228,7 @@ async def test_get_track_info_filtered():
 # PROMPTS
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_circuit_guidance_led():
     """Test circuit guidance for LED"""
@@ -261,6 +266,7 @@ async def test_fabrication_checklist():
 # ERROR HANDLING
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_place_component_with_invalid_reference():
     """Test component placement with invalid reference (mock mode)"""
@@ -284,12 +290,13 @@ async def test_get_track_info_nonexistent_net():
 # SERVER INITIALIZATION
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_server_initialization():
     """Test extended server initializes correctly"""
     server = KiCadMCPServerExtended()
 
-    assert hasattr(server, 'logger')
-    assert hasattr(server, 'settings')
-    assert hasattr(server, 'server')
+    assert hasattr(server, "logger")
+    assert hasattr(server, "settings")
+    assert hasattr(server, "server")
     assert server.board is None  # No board in mock mode

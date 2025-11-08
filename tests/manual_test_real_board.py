@@ -10,23 +10,27 @@ import os
 # Test if pcbnew is available
 try:
     import pcbnew
+
     print("✓ pcbnew module loaded successfully")
     print(f"  KiCad version: {pcbnew.GetBuildVersion()}")
 except ImportError as e:
     print("✗ pcbnew module not available")
     print(f"  Error: {e}")
     print("\nTo run this test:")
-    print("  flatpak run --command=python3 --filesystem=home org.kicad.KiCad test_real_board.py")
+    print(
+        "  flatpak run --command=python3 --filesystem=home org.kicad.KiCad test_real_board.py"
+    )
     sys.exit(1)
 
 # Path to test board
 BOARD_PATH = "/home/pablo/repos/Proyecto-Incubadora/HardWare/Electro/Olivia_control/v0.2/v0.2.kicad_pcb"
 
+
 def test_load_board():
     """Test loading a real KiCad board."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 1: Loading Board")
-    print("="*60)
+    print("=" * 60)
 
     if not os.path.exists(BOARD_PATH):
         print(f"✗ Board file not found: {BOARD_PATH}")
@@ -50,11 +54,12 @@ def test_load_board():
         print(f"✗ Failed to load board: {e}")
         return False
 
+
 def test_list_components(board):
     """Test listing components."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 2: Listing Components")
-    print("="*60)
+    print("=" * 60)
 
     try:
         footprints = board.GetFootprints()
@@ -81,11 +86,12 @@ def test_list_components(board):
         print(f"✗ Failed to list components: {e}")
         return False
 
+
 def test_get_nets(board):
     """Test reading netlist."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 3: Reading Netlist")
-    print("="*60)
+    print("=" * 60)
 
     try:
         netinfo = board.GetNetInfo()
@@ -119,14 +125,16 @@ def test_get_nets(board):
     except Exception as e:
         print(f"✗ Failed to read netlist: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
+
 def test_board_info(board):
     """Test getting board information."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 4: Board Information")
-    print("="*60)
+    print("=" * 60)
 
     try:
         bbox = board.GetBoardEdgesBoundingBox()
@@ -154,14 +162,16 @@ def test_board_info(board):
     except Exception as e:
         print(f"✗ Failed to get board info: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
+
 def test_export_bom(board):
     """Test BOM export (read-only, don't write file)."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("TEST 5: BOM Generation (dry run)")
-    print("="*60)
+    print("=" * 60)
 
     try:
         # Group components by value and footprint
@@ -184,8 +194,12 @@ def test_export_bom(board):
         for i, ((value, footprint), refs) in enumerate(sorted(bom.items())):
             if i >= 15:  # Show only first 15
                 remaining_parts = len(bom) - 15
-                remaining_components = sum(len(refs) for (v, f), refs in list(bom.items())[15:])
-                print(f"... and {remaining_parts} more part types ({remaining_components} components)")
+                remaining_components = sum(
+                    len(refs) for (v, f), refs in list(bom.items())[15:]
+                )
+                print(
+                    f"... and {remaining_parts} more part types ({remaining_components} components)"
+                )
                 break
 
             refs_str = ", ".join(sorted(refs)[:5])
@@ -202,14 +216,16 @@ def test_export_bom(board):
     except Exception as e:
         print(f"✗ Failed to generate BOM: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
+
 def main():
     """Run all tests."""
-    print("="*60)
+    print("=" * 60)
     print("KiCad MCP Server - Real Board Tests")
-    print("="*60)
+    print("=" * 60)
     print(f"Test board: {os.path.basename(BOARD_PATH)}")
 
     # Test 1: Load board
@@ -239,13 +255,14 @@ def main():
         return 1
 
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("✓ ALL TESTS PASSED")
-    print("="*60)
+    print("=" * 60)
     print("\nThe MCP server should work correctly with real KiCad boards.")
     print("Next step: Test with MCP server running")
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

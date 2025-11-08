@@ -21,7 +21,12 @@ from mcp.types import (
 from pydantic import ValidationError
 
 from mcp_kicad.config import get_settings
-from mcp_kicad.log import get_logger, operation_context, set_correlation_id, setup_logging
+from mcp_kicad.log import (
+    get_logger,
+    operation_context,
+    set_correlation_id,
+    setup_logging,
+)
 from mcp_kicad.exceptions import (
     BoardNotOpenError,
     ComponentNotFoundError,
@@ -94,48 +99,39 @@ class KiCadMCPServer:
                         "properties": {
                             "reference": {
                                 "type": "string",
-                                "description": "Component reference designator (e.g., 'R1', 'U1', 'C5')"
+                                "description": "Component reference designator (e.g., 'R1', 'U1', 'C5')",
                             },
                             "x_mm": {
                                 "type": "number",
-                                "description": "X position in millimeters"
+                                "description": "X position in millimeters",
                             },
                             "y_mm": {
                                 "type": "number",
-                                "description": "Y position in millimeters"
+                                "description": "Y position in millimeters",
                             },
                             "rotation_deg": {
                                 "type": "number",
                                 "description": "Rotation angle in degrees (default: 0)",
-                                "default": 0
-                            }
+                                "default": 0,
+                            },
                         },
-                        "required": ["reference", "x_mm", "y_mm"]
-                    }
+                        "required": ["reference", "x_mm", "y_mm"],
+                    },
                 ),
                 Tool(
                     name="read_netlist",
                     description="Read the netlist from the current PCB board, returning component and net information",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {}
-                    }
+                    inputSchema={"type": "object", "properties": {}},
                 ),
                 Tool(
                     name="list_components",
                     description="List all components (footprints) on the PCB board with their current positions",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {}
-                    }
+                    inputSchema={"type": "object", "properties": {}},
                 ),
                 Tool(
                     name="get_board_info",
                     description="Get general information about the PCB board (size, layer count, etc.)",
-                    inputSchema={
-                        "type": "object",
-                        "properties": {}
-                    }
+                    inputSchema={"type": "object", "properties": {}},
                 ),
             ]
 
@@ -145,7 +141,9 @@ class KiCadMCPServer:
             # Set correlation ID for request tracking
             set_correlation_id()
 
-            self.logger.info("tool_called", tool_name=name, has_arguments=bool(arguments))
+            self.logger.info(
+                "tool_called", tool_name=name, has_arguments=bool(arguments)
+            )
 
             try:
                 if name == "place_component":
@@ -153,7 +151,9 @@ class KiCadMCPServer:
                     try:
                         validated = PlaceComponentInput(**arguments)
                     except ValidationError as e:
-                        self.logger.warning("validation_failed", tool=name, errors=e.errors())
+                        self.logger.warning(
+                            "validation_failed", tool=name, errors=e.errors()
+                        )
                         error_response = ErrorResponse(
                             error="Input validation failed",
                             error_code="VALIDATION_ERROR",
@@ -166,17 +166,19 @@ class KiCadMCPServer:
                             context={"validation_errors": e.errors()},
                             can_retry=True,
                         )
-                        return [TextContent(
-                            type="text",
-                            text=error_response.model_dump_json(indent=2)
-                        )]
+                        return [
+                            TextContent(
+                                type="text",
+                                text=error_response.model_dump_json(indent=2),
+                            )
+                        ]
 
                     # Call with validated data
                     result = await self._place_component(
                         validated.reference,
                         validated.x_mm,
                         validated.y_mm,
-                        validated.rotation_deg
+                        validated.rotation_deg,
                     )
                 elif name == "read_netlist":
                     result = await self._read_netlist()
@@ -188,14 +190,19 @@ class KiCadMCPServer:
                     self.logger.error("unknown_tool", tool_name=name)
                     result = {"error": f"Unknown tool: {name}"}
 
-                self.logger.info("tool_completed", tool_name=name, status=result.get("status", "unknown"))
-                return [TextContent(
-                    type="text",
-                    text=json.dumps(result, indent=2)
-                )]
+                self.logger.info(
+                    "tool_completed",
+                    tool_name=name,
+                    status=result.get("status", "unknown"),
+                )
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            except (BoardNotOpenError, ComponentNotFoundError, InvalidCoordinateError,
-                    KiCadAPIError) as e:
+            except (
+                BoardNotOpenError,
+                ComponentNotFoundError,
+                InvalidCoordinateError,
+                KiCadAPIError,
+            ) as e:
                 # Structured errors
                 self.logger.error(
                     "tool_error",
@@ -203,19 +210,19 @@ class KiCadMCPServer:
                     error_type=type(e).__name__,
                     error_code=e.error_code,
                 )
-                return [TextContent(
-                    type="text",
-                    text=json.dumps(e.to_dict(), indent=2)
-                )]
+                return [
+                    TextContent(type="text", text=json.dumps(e.to_dict(), indent=2))
+                ]
 
             except Exception as e:
                 # Unexpected errors
-                self.logger.exception("tool_unexpected_error", tool_name=name, error=str(e))
+                self.logger.exception(
+                    "tool_unexpected_error", tool_name=name, error=str(e)
+                )
                 error = KiCadAPIError(name, str(e))
-                return [TextContent(
-                    type="text",
-                    text=json.dumps(error.to_dict(), indent=2)
-                )]
+                return [
+                    TextContent(type="text", text=json.dumps(error.to_dict(), indent=2))
+                ]
 
         # List available resources
         @self.server.list_resources()
@@ -225,14 +232,14 @@ class KiCadMCPServer:
                     uri="board://schematic",
                     name="PCB Schematic Components",
                     mimeType="application/json",
-                    description="List of all components from the board schematic"
+                    description="List of all components from the board schematic",
                 ),
                 Resource(
                     uri="board://info",
                     name="PCB Board Information",
                     mimeType="application/json",
-                    description="General PCB board information and settings"
-                )
+                    description="General PCB board information and settings",
+                ),
             ]
 
         # Handle resource reads
@@ -258,15 +265,17 @@ class KiCadMCPServer:
                         {
                             "name": "type",
                             "description": "Type of circuit (e.g., 'LED', 'power_supply', 'amplifier')",
-                            "required": False
+                            "required": False,
                         }
-                    ]
+                    ],
                 )
             ]
 
         # Handle prompt requests
         @self.server.get_prompt()
-        async def get_prompt(name: str, arguments: Optional[Dict[str, str]] = None) -> GetPromptResult:
+        async def get_prompt(
+            name: str, arguments: Optional[Dict[str, str]] = None
+        ) -> GetPromptResult:
             if name == "simple_circuit":
                 circuit_type = arguments.get("type", "LED") if arguments else "LED"
 
@@ -278,13 +287,9 @@ class KiCadMCPServer:
                     description=f"Layout guidance for {circuit_type} circuit",
                     messages=[
                         PromptMessage(
-                            role="user",
-                            content=TextContent(
-                                type="text",
-                                text=guidance
-                            )
+                            role="user", content=TextContent(type="text", text=guidance)
                         )
-                    ]
+                    ],
                 )
             else:
                 raise ValueError(f"Unknown prompt: {name}")
@@ -292,10 +297,14 @@ class KiCadMCPServer:
     def _get_circuit_guidance(self, circuit_type: str, components: Dict) -> str:
         """Generate layout guidance for different circuit types"""
 
-        base_text = f"Current components on board:\n{json.dumps(components, indent=2)}\n\n"
+        base_text = (
+            f"Current components on board:\n{json.dumps(components, indent=2)}\n\n"
+        )
 
         if circuit_type.lower() == "led":
-            return base_text + """
+            return (
+                base_text
+                + """
 Layout guidance for LED circuit:
 1. Place LED (D1 or similar) in a central location
 2. Place current-limiting resistor (R1) close to LED anode
@@ -307,8 +316,11 @@ Typical spacing:
 - LED to resistor: 5-10mm
 - Components to board edge: minimum 3mm
 """
+            )
         elif circuit_type.lower() in ["power_supply", "power"]:
-            return base_text + """
+            return (
+                base_text
+                + """
 Layout guidance for power supply:
 1. Place input connector on one edge
 2. Group filtering capacitors near voltage regulator
@@ -321,8 +333,11 @@ Critical spacing:
 - Output caps to load: < 15mm
 - Heatsink clearance: check datasheet
 """
+            )
         else:
-            return base_text + f"""
+            return (
+                base_text
+                + f"""
 Layout guidance for {circuit_type} circuit:
 1. Group related components together
 2. Place connectors on board edges
@@ -336,8 +351,11 @@ Standard practices:
 - Components to board edge: > 3mm
 - High-frequency components: minimize trace length
 """
+            )
 
-    async def _place_component(self, reference: str, x_mm: float, y_mm: float, rotation_deg: float = 0) -> Dict:
+    async def _place_component(
+        self, reference: str, x_mm: float, y_mm: float, rotation_deg: float = 0
+    ) -> Dict:
         """
         Place/move a component on the board.
 
@@ -367,7 +385,7 @@ Standard practices:
                 self.logger.warning("pcbnew_unavailable", mode="mock")
                 return {
                     "status": "mock",
-                    "message": f"Mock: Would place {reference} at ({x_mm}, {y_mm}) mm, rotation {rotation_deg}°"
+                    "message": f"Mock: Would place {reference} at ({x_mm}, {y_mm}) mm, rotation {rotation_deg}°",
                 }
 
             # Load board
@@ -410,7 +428,7 @@ Standard practices:
                 "reference": reference,
                 "position": {"x_mm": x_mm, "y_mm": y_mm},
                 "rotation_deg": rotation_deg,
-                "message": f"Placed {reference} at ({x_mm}, {y_mm}) mm with {rotation_deg}° rotation"
+                "message": f"Placed {reference} at ({x_mm}, {y_mm}) mm with {rotation_deg}° rotation",
             }
 
     async def _list_components(self) -> Dict:
@@ -421,10 +439,28 @@ Standard practices:
                 return {
                     "status": "mock",
                     "components": [
-                        {"reference": "R1", "value": "10k", "x_mm": 10, "y_mm": 20, "rotation_deg": 0},
-                        {"reference": "C1", "value": "100nF", "x_mm": 20, "y_mm": 20, "rotation_deg": 90},
-                        {"reference": "U1", "value": "LM358", "x_mm": 30, "y_mm": 30, "rotation_deg": 0},
-                    ]
+                        {
+                            "reference": "R1",
+                            "value": "10k",
+                            "x_mm": 10,
+                            "y_mm": 20,
+                            "rotation_deg": 0,
+                        },
+                        {
+                            "reference": "C1",
+                            "value": "100nF",
+                            "x_mm": 20,
+                            "y_mm": 20,
+                            "rotation_deg": 90,
+                        },
+                        {
+                            "reference": "U1",
+                            "value": "LM358",
+                            "x_mm": 30,
+                            "y_mm": 30,
+                            "rotation_deg": 0,
+                        },
+                    ],
                 }
 
             if self.board is None:
@@ -438,14 +474,16 @@ Standard practices:
             try:
                 for fp in self.board.GetFootprints():
                     pos = fp.GetPosition()
-                    components.append({
-                        "reference": fp.GetReference(),
-                        "value": fp.GetValue(),
-                        "x_mm": pos.x / 1e6,
-                        "y_mm": pos.y / 1e6,
-                        "rotation_deg": fp.GetOrientationDegrees(),
-                        "layer": fp.GetLayerName()
-                    })
+                    components.append(
+                        {
+                            "reference": fp.GetReference(),
+                            "value": fp.GetValue(),
+                            "x_mm": pos.x / 1e6,
+                            "y_mm": pos.y / 1e6,
+                            "rotation_deg": fp.GetOrientationDegrees(),
+                            "layer": fp.GetLayerName(),
+                        }
+                    )
             except Exception as e:
                 raise KiCadAPIError("GetFootprints", str(e))
 
@@ -454,7 +492,7 @@ Standard practices:
             return {
                 "status": "success",
                 "count": len(components),
-                "components": components
+                "components": components,
             }
 
     async def _read_netlist(self) -> Dict:
@@ -468,7 +506,7 @@ Standard practices:
                         {"name": "GND", "pads": 5},
                         {"name": "+5V", "pads": 3},
                         {"name": "LED_OUT", "pads": 2},
-                    ]
+                    ],
                 }
 
             if self.board is None:
@@ -483,20 +521,18 @@ Standard practices:
                 netinfo = self.board.GetNetInfo()
                 for net_name, net in netinfo.NetsByName().items():
                     if net_name:
-                        nets.append({
-                            "name": net_name,
-                            "code": net.GetNetCode(),
-                        })
+                        nets.append(
+                            {
+                                "name": net_name,
+                                "code": net.GetNetCode(),
+                            }
+                        )
             except Exception as e:
                 raise KiCadAPIError("GetNetInfo", str(e))
 
             ctx.log_progress("netlist_read", net_count=len(nets))
 
-            return {
-                "status": "success",
-                "count": len(nets),
-                "nets": nets
-            }
+            return {"status": "success", "count": len(nets), "nets": nets}
 
     async def _get_board_info(self) -> Dict:
         """Get general board information."""
@@ -507,7 +543,7 @@ Standard practices:
                     "status": "mock",
                     "board_name": "example_board",
                     "size": {"width_mm": 100, "height_mm": 80},
-                    "layers": 2
+                    "layers": 2,
                 }
 
             if self.board is None:
@@ -523,7 +559,9 @@ Standard practices:
             except Exception as e:
                 raise KiCadAPIError("GetBoardInfo", str(e))
 
-            ctx.log_progress("board_info_retrieved", components=component_count, layers=layer_count)
+            ctx.log_progress(
+                "board_info_retrieved", components=component_count, layers=layer_count
+            )
 
             return {
                 "status": "success",
@@ -540,9 +578,7 @@ Standard practices:
         """Run the MCP server"""
         async with stdio_server() as (read_stream, write_stream):
             await self.server.run(
-                read_stream,
-                write_stream,
-                self.server.create_initialization_options()
+                read_stream, write_stream, self.server.create_initialization_options()
             )
 
 

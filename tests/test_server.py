@@ -83,9 +83,9 @@ async def test_server_initialization():
     """Test server initializes with correct attributes"""
     server = KiCadMCPServer()
 
-    assert hasattr(server, 'logger')
-    assert hasattr(server, 'settings')
-    assert hasattr(server, 'server')
+    assert hasattr(server, "logger")
+    assert hasattr(server, "settings")
+    assert hasattr(server, "server")
     assert server.board is None  # No board loaded in mock mode
 
 

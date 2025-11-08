@@ -15,7 +15,9 @@ try:
 except ImportError:
     print("ERROR: pcbnew module not available")
     print("This script must be run with KiCad's Python:")
-    print("  flatpak run --command=python3 org.kicad.KiCad generate_olivia_fabrication.py")
+    print(
+        "  flatpak run --command=python3 org.kicad.KiCad generate_olivia_fabrication.py"
+    )
     sys.exit(1)
 
 
@@ -157,7 +159,9 @@ def main():
     print("Generating drill files...")
 
     drlwriter = pcbnew.EXCELLON_WRITER(board)
-    drlwriter.SetOptions(False, False, pcbnew.VECTOR2I(0, 0), False)  # Don't merge PTH/NPTH
+    drlwriter.SetOptions(
+        False, False, pcbnew.VECTOR2I(0, 0), False
+    )  # Don't merge PTH/NPTH
     drlwriter.SetFormat(False)  # Metric
     drlwriter.CreateDrillandMapFilesSet(str(drill_dir), True, False)
 
@@ -191,18 +195,20 @@ def main():
                 "value": value,
                 "footprint": footprint,
                 "references": [],
-                "quantity": 0
+                "quantity": 0,
             }
 
         bom_data[key]["references"].append(fp.GetReference())
         bom_data[key]["quantity"] += 1
 
     # Write CSV
-    with open(bom_file, 'w') as f:
+    with open(bom_file, "w") as f:
         f.write("Reference,Value,Footprint,Quantity\n")
         for item in sorted(bom_data.values(), key=lambda x: x["value"]):
             refs = " ".join(sorted(item["references"]))
-            f.write(f'"{refs}","{item["value"]}","{item["footprint"]}",{item["quantity"]}\n')
+            f.write(
+                f'"{refs}","{item["value"]}","{item["footprint"]}",{item["quantity"]}\n'
+            )
 
     unique_parts = len(bom_data)
     total_components = sum(item["quantity"] for item in bom_data.values())
@@ -218,17 +224,19 @@ def main():
 
     pos_file = output_dir / "position.csv"
 
-    with open(pos_file, 'w') as f:
+    with open(pos_file, "w") as f:
         f.write("Designator,Val,Package,Mid X,Mid Y,Rotation,Layer\n")
 
         for fp in board.GetFootprints():
             pos = fp.GetPosition()
             layer = "Top" if fp.GetLayer() == pcbnew.F_Cu else "Bottom"
 
-            f.write(f'"{fp.GetReference()}","{fp.GetValue()}",'
-                   f'"{fp.GetFPID().GetLibItemName()}",'
-                   f'{pos.x/1e6:.4f},{pos.y/1e6:.4f},'
-                   f'{fp.GetOrientationDegrees():.2f},{layer}\n')
+            f.write(
+                f'"{fp.GetReference()}","{fp.GetValue()}",'
+                f'"{fp.GetFPID().GetLibItemName()}",'
+                f"{pos.x/1e6:.4f},{pos.y/1e6:.4f},"
+                f"{fp.GetOrientationDegrees():.2f},{layer}\n"
+            )
 
     print(f"✓ Position file: {component_count} components")
     print(f"  Saved to: {pos_file.name}")
@@ -241,7 +249,7 @@ def main():
 
     zip_path = Path(output_base) / f"olivia_v0.2_fabrication_{timestamp}.zip"
 
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         # Add gerber files
         for file in gerber_dir.glob("*"):
             arcname = f"gerber/{file.name}"
@@ -288,7 +296,7 @@ def main():
 
     # Create a summary file
     summary_file = output_dir / "FABRICATION_SUMMARY.txt"
-    with open(summary_file, 'w') as f:
+    with open(summary_file, "w") as f:
         f.write("OLIVIA CONTROL v0.2 - FABRICATION PACKAGE\n")
         f.write("=" * 70 + "\n\n")
         f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
@@ -319,5 +327,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nERROR: {str(e)}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

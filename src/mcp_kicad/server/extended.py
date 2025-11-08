@@ -26,7 +26,12 @@ from mcp.types import (
 from pydantic import ValidationError
 
 from mcp_kicad.config import get_settings
-from mcp_kicad.log import get_logger, operation_context, set_correlation_id, setup_logging
+from mcp_kicad.log import (
+    get_logger,
+    operation_context,
+    set_correlation_id,
+    setup_logging,
+)
 from mcp_kicad.exceptions import (
     BoardNotOpenError,
     ComponentNotFoundError,
@@ -109,30 +114,42 @@ class KiCadMCPServerExtended:
                     inputSchema={
                         "type": "object",
                         "properties": {
-                            "reference": {"type": "string", "description": "Component reference (e.g., 'R1')"},
-                            "x_mm": {"type": "number", "description": "X position in millimeters"},
-                            "y_mm": {"type": "number", "description": "Y position in millimeters"},
-                            "rotation_deg": {"type": "number", "description": "Rotation in degrees", "default": 0}
+                            "reference": {
+                                "type": "string",
+                                "description": "Component reference (e.g., 'R1')",
+                            },
+                            "x_mm": {
+                                "type": "number",
+                                "description": "X position in millimeters",
+                            },
+                            "y_mm": {
+                                "type": "number",
+                                "description": "Y position in millimeters",
+                            },
+                            "rotation_deg": {
+                                "type": "number",
+                                "description": "Rotation in degrees",
+                                "default": 0,
+                            },
                         },
-                        "required": ["reference", "x_mm", "y_mm"]
-                    }
+                        "required": ["reference", "x_mm", "y_mm"],
+                    },
                 ),
                 Tool(
                     name="list_components",
                     description="List all components on the PCB with their positions",
-                    inputSchema={"type": "object", "properties": {}}
+                    inputSchema={"type": "object", "properties": {}},
                 ),
                 Tool(
                     name="read_netlist",
                     description="Read netlist information from the PCB",
-                    inputSchema={"type": "object", "properties": {}}
+                    inputSchema={"type": "object", "properties": {}},
                 ),
                 Tool(
                     name="get_board_info",
                     description="Get general PCB information (size, layers, etc.)",
-                    inputSchema={"type": "object", "properties": {}}
+                    inputSchema={"type": "object", "properties": {}},
                 ),
-
                 # Fabrication tools
                 Tool(
                     name="export_gerber",
@@ -142,21 +159,21 @@ class KiCadMCPServerExtended:
                         "properties": {
                             "output_dir": {
                                 "type": "string",
-                                "description": "Output directory for Gerber files"
+                                "description": "Output directory for Gerber files",
                             },
                             "layers": {
                                 "type": "array",
                                 "items": {"type": "string"},
-                                "description": "Layers to export (default: all standard layers)"
+                                "description": "Layers to export (default: all standard layers)",
                             },
                             "create_job_file": {
                                 "type": "boolean",
                                 "description": "Create Gerber job file (.gbrjob)",
-                                "default": True
-                            }
+                                "default": True,
+                            },
                         },
-                        "required": ["output_dir"]
-                    }
+                        "required": ["output_dir"],
+                    },
                 ),
                 Tool(
                     name="export_drill_files",
@@ -164,15 +181,18 @@ class KiCadMCPServerExtended:
                     inputSchema={
                         "type": "object",
                         "properties": {
-                            "output_dir": {"type": "string", "description": "Output directory"},
+                            "output_dir": {
+                                "type": "string",
+                                "description": "Output directory",
+                            },
                             "merge_pth_npth": {
                                 "type": "boolean",
                                 "description": "Merge PTH and NPTH into one file",
-                                "default": False
-                            }
+                                "default": False,
+                            },
                         },
-                        "required": ["output_dir"]
-                    }
+                        "required": ["output_dir"],
+                    },
                 ),
                 Tool(
                     name="export_fabrication_package",
@@ -180,16 +200,19 @@ class KiCadMCPServerExtended:
                     inputSchema={
                         "type": "object",
                         "properties": {
-                            "output_dir": {"type": "string", "description": "Output directory"},
+                            "output_dir": {
+                                "type": "string",
+                                "description": "Output directory",
+                            },
                             "manufacturer_preset": {
                                 "type": "string",
                                 "enum": ["jlcpcb", "pcbway", "oshpark", "generic"],
                                 "description": "Manufacturer preset for naming conventions",
-                                "default": "generic"
-                            }
+                                "default": "generic",
+                            },
                         },
-                        "required": ["output_dir"]
-                    }
+                        "required": ["output_dir"],
+                    },
                 ),
                 Tool(
                     name="export_bom",
@@ -197,10 +220,13 @@ class KiCadMCPServerExtended:
                     inputSchema={
                         "type": "object",
                         "properties": {
-                            "output_file": {"type": "string", "description": "Output CSV file path"}
+                            "output_file": {
+                                "type": "string",
+                                "description": "Output CSV file path",
+                            }
                         },
-                        "required": ["output_file"]
-                    }
+                        "required": ["output_file"],
+                    },
                 ),
                 Tool(
                     name="export_position_file",
@@ -208,12 +234,14 @@ class KiCadMCPServerExtended:
                     inputSchema={
                         "type": "object",
                         "properties": {
-                            "output_file": {"type": "string", "description": "Output CSV file path"}
+                            "output_file": {
+                                "type": "string",
+                                "description": "Output CSV file path",
+                            }
                         },
-                        "required": ["output_file"]
-                    }
+                        "required": ["output_file"],
+                    },
                 ),
-
                 # Verification tools
                 Tool(
                     name="run_drc",
@@ -225,12 +253,11 @@ class KiCadMCPServerExtended:
                                 "type": "string",
                                 "enum": ["error", "warning", "all"],
                                 "description": "Minimum severity level to report",
-                                "default": "all"
+                                "default": "all",
                             }
-                        }
-                    }
+                        },
+                    },
                 ),
-
                 # Layout tools
                 Tool(
                     name="fill_zones",
@@ -241,10 +268,10 @@ class KiCadMCPServerExtended:
                             "zone_names": {
                                 "type": "array",
                                 "items": {"type": "string"},
-                                "description": "Specific zone net names to fill (optional)"
+                                "description": "Specific zone net names to fill (optional)",
                             }
-                        }
-                    }
+                        },
+                    },
                 ),
                 Tool(
                     name="get_track_info",
@@ -254,10 +281,10 @@ class KiCadMCPServerExtended:
                         "properties": {
                             "net_name": {
                                 "type": "string",
-                                "description": "Filter by net name (optional)"
+                                "description": "Filter by net name (optional)",
                             }
-                        }
-                    }
+                        },
+                    },
                 ),
             ]
 
@@ -267,7 +294,9 @@ class KiCadMCPServerExtended:
             # Set correlation ID for request tracking
             set_correlation_id()
 
-            self.logger.info("tool_called", tool_name=name, has_arguments=bool(arguments))
+            self.logger.info(
+                "tool_called", tool_name=name, has_arguments=bool(arguments)
+            )
 
             # Helper function for validation errors
             def validation_error_response(e: ValidationError) -> List[TextContent]:
@@ -284,7 +313,11 @@ class KiCadMCPServerExtended:
                     context={"validation_errors": e.errors()},
                     can_retry=True,
                 )
-                return [TextContent(type="text", text=error_response.model_dump_json(indent=2))]
+                return [
+                    TextContent(
+                        type="text", text=error_response.model_dump_json(indent=2)
+                    )
+                ]
 
             try:
                 # Basic tools
@@ -294,7 +327,10 @@ class KiCadMCPServerExtended:
                     except ValidationError as e:
                         return validation_error_response(e)
                     result = await self._place_component(
-                        validated.reference, validated.x_mm, validated.y_mm, validated.rotation_deg
+                        validated.reference,
+                        validated.x_mm,
+                        validated.y_mm,
+                        validated.rotation_deg,
                     )
 
                 elif name == "list_components":
@@ -313,7 +349,9 @@ class KiCadMCPServerExtended:
                     except ValidationError as e:
                         return validation_error_response(e)
                     result = await self._export_gerber(
-                        validated.output_dir, validated.layers, validated.create_job_file
+                        validated.output_dir,
+                        validated.layers,
+                        validated.create_job_file,
                     )
 
                 elif name == "export_drill_files":
@@ -375,11 +413,22 @@ class KiCadMCPServerExtended:
                     self.logger.error("unknown_tool", tool_name=name)
                     result = {"error": f"Unknown tool: {name}"}
 
-                self.logger.info("tool_completed", tool_name=name, status=result.get("status", "unknown"))
+                self.logger.info(
+                    "tool_completed",
+                    tool_name=name,
+                    status=result.get("status", "unknown"),
+                )
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
-            except (BoardNotOpenError, ComponentNotFoundError, InvalidCoordinateError,
-                    KiCadAPIError, ExportError, FileOperationError, DRCError) as e:
+            except (
+                BoardNotOpenError,
+                ComponentNotFoundError,
+                InvalidCoordinateError,
+                KiCadAPIError,
+                ExportError,
+                FileOperationError,
+                DRCError,
+            ) as e:
                 # Structured errors
                 self.logger.error(
                     "tool_error",
@@ -387,13 +436,19 @@ class KiCadMCPServerExtended:
                     error_type=type(e).__name__,
                     error_code=e.error_code,
                 )
-                return [TextContent(type="text", text=json.dumps(e.to_dict(), indent=2))]
+                return [
+                    TextContent(type="text", text=json.dumps(e.to_dict(), indent=2))
+                ]
 
             except Exception as e:
                 # Unexpected errors
-                self.logger.exception("tool_unexpected_error", tool_name=name, error=str(e))
+                self.logger.exception(
+                    "tool_unexpected_error", tool_name=name, error=str(e)
+                )
                 error = KiCadAPIError(name, str(e))
-                return [TextContent(type="text", text=json.dumps(error.to_dict(), indent=2))]
+                return [
+                    TextContent(type="text", text=json.dumps(error.to_dict(), indent=2))
+                ]
 
         # List available resources
         @self.server.list_resources()
@@ -403,20 +458,20 @@ class KiCadMCPServerExtended:
                     uri="board://schematic",
                     name="PCB Schematic Components",
                     mimeType="application/json",
-                    description="List of all components"
+                    description="List of all components",
                 ),
                 Resource(
                     uri="board://info",
                     name="PCB Board Information",
                     mimeType="application/json",
-                    description="General board info"
+                    description="General board info",
                 ),
                 Resource(
                     uri="board://nets",
                     name="PCB Netlist",
                     mimeType="application/json",
-                    description="All nets on the board"
-                )
+                    description="All nets on the board",
+                ),
             ]
 
         # Handle resource reads
@@ -438,41 +493,48 @@ class KiCadMCPServerExtended:
                 Prompt(
                     name="simple_circuit",
                     description="Get layout guidance for simple circuits",
-                    arguments=[{
-                        "name": "type",
-                        "description": "Circuit type (LED, power_supply, etc.)",
-                        "required": False
-                    }]
+                    arguments=[
+                        {
+                            "name": "type",
+                            "description": "Circuit type (LED, power_supply, etc.)",
+                            "required": False,
+                        }
+                    ],
                 ),
                 Prompt(
                     name="fabrication_checklist",
                     description="Get a checklist before sending to fabrication",
-                    arguments=[]
-                )
+                    arguments=[],
+                ),
             ]
 
         # Handle prompt requests
         @self.server.get_prompt()
-        async def get_prompt(name: str, arguments: Optional[Dict[str, str]] = None) -> GetPromptResult:
+        async def get_prompt(
+            name: str, arguments: Optional[Dict[str, str]] = None
+        ) -> GetPromptResult:
             if name == "simple_circuit":
                 circuit_type = arguments.get("type", "LED") if arguments else "LED"
                 components = await self._list_components()
                 guidance = self._get_circuit_guidance(circuit_type, components)
                 return GetPromptResult(
                     description=f"Layout guidance for {circuit_type} circuit",
-                    messages=[PromptMessage(
-                        role="user",
-                        content=TextContent(type="text", text=guidance)
-                    )]
+                    messages=[
+                        PromptMessage(
+                            role="user", content=TextContent(type="text", text=guidance)
+                        )
+                    ],
                 )
             elif name == "fabrication_checklist":
                 checklist = await self._get_fabrication_checklist()
                 return GetPromptResult(
                     description="Pre-fabrication checklist",
-                    messages=[PromptMessage(
-                        role="user",
-                        content=TextContent(type="text", text=checklist)
-                    )]
+                    messages=[
+                        PromptMessage(
+                            role="user",
+                            content=TextContent(type="text", text=checklist),
+                        )
+                    ],
                 )
             else:
                 raise ValueError(f"Unknown prompt: {name}")
@@ -481,7 +543,9 @@ class KiCadMCPServerExtended:
     # BASIC TOOLS (from original server)
     # ============================================================================
 
-    async def _place_component(self, reference: str, x_mm: float, y_mm: float, rotation_deg: float = 0) -> Dict:
+    async def _place_component(
+        self, reference: str, x_mm: float, y_mm: float, rotation_deg: float = 0
+    ) -> Dict:
         """
         Place or move a component on the board at specified coordinates.
 
@@ -512,7 +576,7 @@ class KiCadMCPServerExtended:
                 self.logger.warning("pcbnew_unavailable", mode="mock")
                 return {
                     "status": "mock",
-                    "message": f"Mock: Would place {reference} at ({x_mm}, {y_mm}) mm, rotation {rotation_deg}°"
+                    "message": f"Mock: Would place {reference} at ({x_mm}, {y_mm}) mm, rotation {rotation_deg}°",
                 }
 
             # Load board if needed
@@ -592,9 +656,21 @@ class KiCadMCPServerExtended:
                 return {
                     "status": "mock",
                     "components": [
-                        {"reference": "R1", "value": "10k", "x_mm": 10, "y_mm": 20, "rotation_deg": 0},
-                        {"reference": "C1", "value": "100nF", "x_mm": 20, "y_mm": 20, "rotation_deg": 90},
-                    ]
+                        {
+                            "reference": "R1",
+                            "value": "10k",
+                            "x_mm": 10,
+                            "y_mm": 20,
+                            "rotation_deg": 0,
+                        },
+                        {
+                            "reference": "C1",
+                            "value": "100nF",
+                            "x_mm": 20,
+                            "y_mm": 20,
+                            "rotation_deg": 90,
+                        },
+                    ],
                 }
 
             # Load board if needed
@@ -610,21 +686,23 @@ class KiCadMCPServerExtended:
                 components = []
                 for fp in self.board.GetFootprints():
                     pos = fp.GetPosition()
-                    components.append({
-                        "reference": fp.GetReference(),
-                        "value": fp.GetValue(),
-                        "x_mm": pos.x / 1e6,
-                        "y_mm": pos.y / 1e6,
-                        "rotation_deg": fp.GetOrientationDegrees(),
-                        "layer": fp.GetLayerName()
-                    })
+                    components.append(
+                        {
+                            "reference": fp.GetReference(),
+                            "value": fp.GetValue(),
+                            "x_mm": pos.x / 1e6,
+                            "y_mm": pos.y / 1e6,
+                            "rotation_deg": fp.GetOrientationDegrees(),
+                            "layer": fp.GetLayerName(),
+                        }
+                    )
 
                 ctx.log_progress("components_enumerated", count=len(components))
 
                 return {
                     "status": "success",
                     "count": len(components),
-                    "components": components
+                    "components": components,
                 }
 
             except Exception as e:
@@ -654,7 +732,7 @@ class KiCadMCPServerExtended:
                     "nets": [
                         {"name": "GND", "code": 0},
                         {"name": "+5V", "code": 1},
-                    ]
+                    ],
                 }
 
             # Load board if needed
@@ -675,11 +753,7 @@ class KiCadMCPServerExtended:
 
                 ctx.log_progress("netlist_read", net_count=len(nets))
 
-                return {
-                    "status": "success",
-                    "count": len(nets),
-                    "nets": nets
-                }
+                return {"status": "success", "count": len(nets), "nets": nets}
 
             except Exception as e:
                 raise KiCadAPIError(
@@ -707,7 +781,7 @@ class KiCadMCPServerExtended:
                     "status": "mock",
                     "board_name": "example_board.kicad_pcb",
                     "size": {"width_mm": 100, "height_mm": 80},
-                    "layers": 2
+                    "layers": 2,
                 }
 
             # Load board if needed
@@ -727,7 +801,7 @@ class KiCadMCPServerExtended:
                 ctx.log_progress(
                     "board_info_collected",
                     components=component_count,
-                    layers=layer_count
+                    layers=layer_count,
                 )
 
                 return {
@@ -753,24 +827,34 @@ class KiCadMCPServerExtended:
         base = f"Components:\n{json.dumps(components, indent=2)}\n\n"
 
         if circuit_type.lower() == "led":
-            return base + """Layout guidance for LED circuit:
+            return (
+                base
+                + """Layout guidance for LED circuit:
 1. Place LED centrally
 2. Place resistor near LED anode
 3. Keep traces short
 4. Min 3mm from board edge"""
+            )
         else:
-            return base + f"""Layout guidance for {circuit_type}:
+            return (
+                base
+                + f"""Layout guidance for {circuit_type}:
 1. Group related components
 2. Place connectors on edges
 3. Keep signal paths short
 4. Decoupling caps near ICs (< 5mm)"""
+            )
 
     # ============================================================================
     # FABRICATION TOOLS
     # ============================================================================
 
-    async def _export_gerber(self, output_dir: str, layers: Optional[List[str]] = None,
-                            create_job_file: bool = True) -> Dict:
+    async def _export_gerber(
+        self,
+        output_dir: str,
+        layers: Optional[List[str]] = None,
+        create_job_file: bool = True,
+    ) -> Dict:
         """
         Export Gerber files for PCB fabrication.
 
@@ -800,7 +884,13 @@ class KiCadMCPServerExtended:
                 return {
                     "status": "mock",
                     "message": f"Mock: Would export Gerber files to {output_dir}",
-                    "files": ["F_Cu.gbr", "B_Cu.gbr", "F_Mask.gbr", "B_Mask.gbr", "Edge_Cuts.gbr"]
+                    "files": [
+                        "F_Cu.gbr",
+                        "B_Cu.gbr",
+                        "F_Mask.gbr",
+                        "B_Mask.gbr",
+                        "Edge_Cuts.gbr",
+                    ],
                 }
 
             # Load board if needed
@@ -825,8 +915,17 @@ class KiCadMCPServerExtended:
             try:
                 # Default layers for fabrication
                 if layers is None:
-                    layers = ["F.Cu", "B.Cu", "F.Mask", "B.Mask", "F.SilkS", "B.SilkS",
-                             "F.Paste", "B.Paste", "Edge.Cuts"]
+                    layers = [
+                        "F.Cu",
+                        "B.Cu",
+                        "F.Mask",
+                        "B.Mask",
+                        "F.SilkS",
+                        "B.SilkS",
+                        "F.Paste",
+                        "B.Paste",
+                        "Edge.Cuts",
+                    ]
 
                 pctl = pcbnew.PLOT_CONTROLLER(self.board)
                 popt = pctl.GetPlotOptions()
@@ -858,7 +957,9 @@ class KiCadMCPServerExtended:
                 for layer_name in layers:
                     layer_id = self.board.GetLayerID(layer_name)
                     if layer_id < 0:
-                        ctx.log_progress("layer_skipped", layer=layer_name, reason="invalid_layer_id")
+                        ctx.log_progress(
+                            "layer_skipped", layer=layer_name, reason="invalid_layer_id"
+                        )
                         continue
 
                     pctl.SetLayer(layer_id)
@@ -869,7 +970,11 @@ class KiCadMCPServerExtended:
                     filename = pctl.GetPlotFileName()
                     if os.path.exists(filename):
                         exported_files.append(os.path.basename(filename))
-                        ctx.log_progress("layer_exported", layer=layer_name, file=os.path.basename(filename))
+                        ctx.log_progress(
+                            "layer_exported",
+                            layer=layer_name,
+                            file=os.path.basename(filename),
+                        )
 
                 ctx.log_progress("export_complete", file_count=len(exported_files))
 
@@ -891,7 +996,9 @@ class KiCadMCPServerExtended:
                     context={"output_dir": output_dir, "layers": layers},
                 ) from e
 
-    async def _export_drill_files(self, output_dir: str, merge_pth_npth: bool = False) -> Dict:
+    async def _export_drill_files(
+        self, output_dir: str, merge_pth_npth: bool = False
+    ) -> Dict:
         """
         Export drill files in Excellon format.
 
@@ -916,12 +1023,16 @@ class KiCadMCPServerExtended:
             if pcbnew is None:
                 self.logger.warning("pcbnew_unavailable", mode="mock")
                 Path(output_dir).mkdir(parents=True, exist_ok=True)
-                files = ["project.drl"] if merge_pth_npth else ["project.drl", "project-NPTH.drl"]
+                files = (
+                    ["project.drl"]
+                    if merge_pth_npth
+                    else ["project.drl", "project-NPTH.drl"]
+                )
                 return {
                     "status": "mock",
                     "message": f"Mock: Would export drill files to {output_dir}",
                     "files": files,
-                    "merged": merge_pth_npth
+                    "merged": merge_pth_npth,
                 }
 
             # Load board if needed
@@ -945,10 +1056,14 @@ class KiCadMCPServerExtended:
             # Export drill files
             try:
                 drlwriter = pcbnew.EXCELLON_WRITER(self.board)
-                drlwriter.SetOptions(False, False, pcbnew.VECTOR2I(0, 0), merge_pth_npth)
+                drlwriter.SetOptions(
+                    False, False, pcbnew.VECTOR2I(0, 0), merge_pth_npth
+                )
                 drlwriter.SetFormat(False)  # Metric
 
-                ctx.log_progress("drill_writer_configured", format="metric", merged=merge_pth_npth)
+                ctx.log_progress(
+                    "drill_writer_configured", format="metric", merged=merge_pth_npth
+                )
 
                 drlwriter.CreateDrillandMapFilesSet(output_dir, True, False)
 
@@ -959,16 +1074,28 @@ class KiCadMCPServerExtended:
                     drill_file = os.path.join(output_dir, f"{board_name}.drl")
                     if os.path.exists(drill_file):
                         exported_files.append(os.path.basename(drill_file))
-                        ctx.log_progress("drill_file_exported", file=os.path.basename(drill_file), type="merged")
+                        ctx.log_progress(
+                            "drill_file_exported",
+                            file=os.path.basename(drill_file),
+                            type="merged",
+                        )
                 else:
                     pth_file = os.path.join(output_dir, f"{board_name}-PTH.drl")
                     npth_file = os.path.join(output_dir, f"{board_name}-NPTH.drl")
                     if os.path.exists(pth_file):
                         exported_files.append(os.path.basename(pth_file))
-                        ctx.log_progress("drill_file_exported", file=os.path.basename(pth_file), type="PTH")
+                        ctx.log_progress(
+                            "drill_file_exported",
+                            file=os.path.basename(pth_file),
+                            type="PTH",
+                        )
                     if os.path.exists(npth_file):
                         exported_files.append(os.path.basename(npth_file))
-                        ctx.log_progress("drill_file_exported", file=os.path.basename(npth_file), type="NPTH")
+                        ctx.log_progress(
+                            "drill_file_exported",
+                            file=os.path.basename(npth_file),
+                            type="NPTH",
+                        )
 
                 ctx.log_progress("export_complete", file_count=len(exported_files))
 
@@ -986,10 +1113,15 @@ class KiCadMCPServerExtended:
                 raise ExportError(
                     file_type="drill",
                     reason=str(e),
-                    context={"output_dir": output_dir, "merge_pth_npth": merge_pth_npth},
+                    context={
+                        "output_dir": output_dir,
+                        "merge_pth_npth": merge_pth_npth,
+                    },
                 ) from e
 
-    async def _export_fabrication_package(self, output_dir: str, manufacturer_preset: str = "generic") -> Dict:
+    async def _export_fabrication_package(
+        self, output_dir: str, manufacturer_preset: str = "generic"
+    ) -> Dict:
         """
         Export complete fabrication package with all necessary files.
 
@@ -1046,8 +1178,11 @@ class KiCadMCPServerExtended:
 
                 # Create ZIP
                 ctx.log_progress("creating_zip_archive")
-                zip_path = Path(output_dir) / f"fabrication_{manufacturer_preset}_{timestamp}.zip"
-                with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                zip_path = (
+                    Path(output_dir)
+                    / f"fabrication_{manufacturer_preset}_{timestamp}.zip"
+                )
+                with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                     for root, dirs, files in os.walk(fab_dir):
                         for file in files:
                             file_path = os.path.join(root, file)
@@ -1057,8 +1192,12 @@ class KiCadMCPServerExtended:
                 ctx.log_progress("package_complete", zip_file=str(zip_path))
 
                 # Extract file lists from results
-                gerber_files = gerber_result.get("data", {}).get("files", gerber_result.get("files", []))
-                drill_files = drill_result.get("data", {}).get("files", drill_result.get("files", []))
+                gerber_files = gerber_result.get("data", {}).get(
+                    "files", gerber_result.get("files", [])
+                )
+                drill_files = drill_result.get("data", {}).get(
+                    "files", drill_result.get("files", [])
+                )
 
                 return {
                     "status": "success",
@@ -1069,7 +1208,7 @@ class KiCadMCPServerExtended:
                             "gerber_files": gerber_files,
                             "drill_files": drill_files,
                             "bom": "bom.csv",
-                            "position": "position.csv"
+                            "position": "position.csv",
                         },
                         "manufacturer": manufacturer_preset,
                         "timestamp": timestamp,
@@ -1082,7 +1221,10 @@ class KiCadMCPServerExtended:
                 raise ExportError(
                     file_type="fabrication_package",
                     reason=str(e),
-                    context={"output_dir": output_dir, "manufacturer": manufacturer_preset},
+                    context={
+                        "output_dir": output_dir,
+                        "manufacturer": manufacturer_preset,
+                    },
                 ) from e
 
     async def _export_bom(self, output_file: str) -> Dict:
@@ -1107,7 +1249,10 @@ class KiCadMCPServerExtended:
             # Mock mode check
             if pcbnew is None:
                 self.logger.warning("pcbnew_unavailable", mode="mock")
-                return {"status": "mock", "message": f"Mock: Would export BOM to {output_file}"}
+                return {
+                    "status": "mock",
+                    "message": f"Mock: Would export BOM to {output_file}",
+                }
 
             # Load board if needed
             if self.board is None:
@@ -1130,7 +1275,7 @@ class KiCadMCPServerExtended:
                             "value": value,
                             "footprint": footprint,
                             "references": [],
-                            "quantity": 0
+                            "quantity": 0,
                         }
 
                     bom_data[key]["references"].append(fp.GetReference())
@@ -1140,14 +1285,18 @@ class KiCadMCPServerExtended:
 
                 # Write CSV
                 Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-                with open(output_file, 'w') as f:
+                with open(output_file, "w") as f:
                     f.write("Reference,Value,Footprint,Quantity\n")
                     for item in sorted(bom_data.values(), key=lambda x: x["value"]):
                         refs = " ".join(sorted(item["references"]))
-                        f.write(f'"{refs}","{item["value"]}","{item["footprint"]}",{item["quantity"]}\n')
+                        f.write(
+                            f'"{refs}","{item["value"]}","{item["footprint"]}",{item["quantity"]}\n'
+                        )
 
                 total_components = sum(item["quantity"] for item in bom_data.values())
-                ctx.log_progress("bom_file_written", file=output_file, rows=len(bom_data))
+                ctx.log_progress(
+                    "bom_file_written", file=output_file, rows=len(bom_data)
+                )
 
                 return {
                     "status": "success",
@@ -1188,7 +1337,10 @@ class KiCadMCPServerExtended:
             # Mock mode check
             if pcbnew is None:
                 self.logger.warning("pcbnew_unavailable", mode="mock")
-                return {"status": "mock", "message": f"Mock: Would export position file to {output_file}"}
+                return {
+                    "status": "mock",
+                    "message": f"Mock: Would export position file to {output_file}",
+                }
 
             # Load board if needed
             if self.board is None:
@@ -1203,20 +1355,26 @@ class KiCadMCPServerExtended:
                 Path(output_file).parent.mkdir(parents=True, exist_ok=True)
 
                 component_count = 0
-                with open(output_file, 'w') as f:
+                with open(output_file, "w") as f:
                     f.write("Designator,Val,Package,Mid X,Mid Y,Rotation,Layer\n")
 
                     for fp in self.board.GetFootprints():
                         pos = fp.GetPosition()
                         layer = "Top" if fp.GetLayer() == pcbnew.F_Cu else "Bottom"
 
-                        f.write(f'"{fp.GetReference()}","{fp.GetValue()}",'
-                               f'"{fp.GetFPID().GetLibItemName()}",'
-                               f'{pos.x/1e6:.4f},{pos.y/1e6:.4f},'
-                               f'{fp.GetOrientationDegrees():.2f},{layer}\n')
+                        f.write(
+                            f'"{fp.GetReference()}","{fp.GetValue()}",'
+                            f'"{fp.GetFPID().GetLibItemName()}",'
+                            f"{pos.x/1e6:.4f},{pos.y/1e6:.4f},"
+                            f"{fp.GetOrientationDegrees():.2f},{layer}\n"
+                        )
                         component_count += 1
 
-                ctx.log_progress("position_file_written", file=output_file, components=component_count)
+                ctx.log_progress(
+                    "position_file_written",
+                    file=output_file,
+                    components=component_count,
+                )
 
                 return {
                     "status": "success",
@@ -1263,11 +1421,19 @@ class KiCadMCPServerExtended:
                 return {
                     "status": "mock",
                     "violations": [
-                        {"type": "clearance", "severity": "error", "description": "Clearance violation between tracks"},
-                        {"type": "track_width", "severity": "warning", "description": "Track width below minimum"}
+                        {
+                            "type": "clearance",
+                            "severity": "error",
+                            "description": "Clearance violation between tracks",
+                        },
+                        {
+                            "type": "track_width",
+                            "severity": "warning",
+                            "description": "Track width below minimum",
+                        },
                     ],
                     "error_count": 1,
-                    "warning_count": 1
+                    "warning_count": 1,
                 }
 
             # Load board if needed
@@ -1299,7 +1465,7 @@ class KiCadMCPServerExtended:
                         "violations": violations,
                         "error_count": error_count,
                         "warning_count": warning_count,
-                        "note": "Full DRC support requires KiCad 7+ with proper API access"
+                        "note": "Full DRC support requires KiCad 7+ with proper API access",
                     },
                 }
 
@@ -1340,7 +1506,7 @@ class KiCadMCPServerExtended:
                     "status": "mock",
                     "message": f"Mock: Would fill copper zones: {', '.join(zones)}",
                     "zones_filled": zones,
-                    "count": len(zones)
+                    "count": len(zones),
                 }
 
             # Load board if needed
@@ -1404,27 +1570,21 @@ class KiCadMCPServerExtended:
             KiCadAPIError: If KiCad API operation fails
         """
         with operation_context(
-            "get_track_info",
-            logger=self.logger,
-            net_filter=net_name or "all"
+            "get_track_info", logger=self.logger, net_filter=net_name or "all"
         ) as ctx:
             # Mock mode check
             if pcbnew is None:
                 self.logger.warning("pcbnew_unavailable", mode="mock")
                 all_tracks = [
                     {"net": "GND", "width_mm": 0.5, "length_mm": 25.4},
-                    {"net": "VCC", "width_mm": 0.3, "length_mm": 18.2}
+                    {"net": "VCC", "width_mm": 0.3, "length_mm": 18.2},
                 ]
                 if net_name:
                     tracks = [t for t in all_tracks if t["net"] == net_name]
                 else:
                     tracks = all_tracks
 
-                return {
-                    "status": "mock",
-                    "tracks": tracks,
-                    "count": len(tracks)
-                }
+                return {"status": "mock", "tracks": tracks, "count": len(tracks)}
 
             # Load board if needed
             if self.board is None:
@@ -1442,19 +1602,21 @@ class KiCadMCPServerExtended:
                     track_net_name = track.GetNetname()
 
                     if net_name is None or track_net_name == net_name:
-                        track_info.append({
-                            "net": track_net_name,
-                            "width_mm": track.GetWidth() / 1e6,
-                            "length_mm": track.GetLength() / 1e6,
-                            "layer": track.GetLayerName()
-                        })
+                        track_info.append(
+                            {
+                                "net": track_net_name,
+                                "width_mm": track.GetWidth() / 1e6,
+                                "length_mm": track.GetLength() / 1e6,
+                                "layer": track.GetLayerName(),
+                            }
+                        )
 
                 ctx.log_progress("tracks_enumerated", count=len(track_info))
 
                 return {
                     "status": "success",
                     "tracks": track_info,
-                    "count": len(track_info)
+                    "count": len(track_info),
                 }
 
             except Exception as e:
@@ -1520,9 +1682,7 @@ Use the export_fabrication_package tool to generate all required files automatic
         """Run the MCP server"""
         async with stdio_server() as (read_stream, write_stream):
             await self.server.run(
-                read_stream,
-                write_stream,
-                self.server.create_initialization_options()
+                read_stream, write_stream, self.server.create_initialization_options()
             )
 
 

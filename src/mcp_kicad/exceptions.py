@@ -82,6 +82,7 @@ class KiCadMCPError(Exception):
 
 # Board-related errors
 
+
 class BoardNotOpenError(KiCadMCPError):
     """Raised when no PCB board is currently open in KiCad."""
 
@@ -122,6 +123,7 @@ class BoardLoadError(KiCadMCPError):
 
 # Component-related errors
 
+
 class ComponentNotFoundError(KiCadMCPError):
     """Raised when a component reference doesn't exist on the board."""
 
@@ -139,7 +141,10 @@ class ComponentNotFoundError(KiCadMCPError):
 
         # Add suggestions for similar references
         from difflib import get_close_matches
-        suggestions = get_close_matches(reference, available_components, n=3, cutoff=0.6)
+
+        suggestions = get_close_matches(
+            reference, available_components, n=3, cutoff=0.6
+        )
         if suggestions:
             remediation.insert(0, f"Did you mean: {', '.join(suggestions)}?")
 
@@ -178,6 +183,7 @@ class InvalidComponentDataError(KiCadMCPError):
 
 
 # Coordinate and geometry errors
+
 
 class InvalidCoordinateError(KiCadMCPError):
     """Raised when coordinates are outside board bounds or invalid."""
@@ -244,6 +250,7 @@ class InvalidRotationError(KiCadMCPError):
 
 # Validation errors
 
+
 class ValidationError(KiCadMCPError):
     """Raised when input validation fails."""
 
@@ -264,6 +271,7 @@ class ValidationError(KiCadMCPError):
 
 
 # File operation errors
+
 
 class FileOperationError(KiCadMCPError):
     """Raised when file operation fails."""
@@ -316,6 +324,7 @@ class PathTraversalError(KiCadMCPError):
 
 # Export errors
 
+
 class ExportError(KiCadMCPError):
     """Raised when export operation fails."""
 
@@ -338,10 +347,13 @@ class ExportError(KiCadMCPError):
 
 # KiCad API errors
 
+
 class KiCadAPIError(KiCadMCPError):
     """Raised when KiCad API call fails."""
 
-    def __init__(self, operation: str, original_error: str, kicad_version: str = "unknown"):
+    def __init__(
+        self, operation: str, original_error: str, kicad_version: str = "unknown"
+    ):
         message = (
             f"KiCad API operation '{operation}' failed: {original_error}. "
             f"KiCad version: {kicad_version}"
@@ -390,6 +402,7 @@ class KiCadNotAvailableError(KiCadMCPError):
 
 # DRC and validation errors
 
+
 class DRCError(KiCadMCPError):
     """Raised when Design Rule Check fails."""
 
@@ -414,6 +427,7 @@ class DRCError(KiCadMCPError):
 
 
 # Network/connection errors
+
 
 class ConnectionError(KiCadMCPError):
     """Raised when connection to KiCad fails."""
@@ -456,6 +470,7 @@ class TimeoutError(KiCadMCPError):
 
 
 # State management errors
+
 
 class StateManagementError(KiCadMCPError):
     """Raised when state management operation fails."""

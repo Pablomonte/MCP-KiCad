@@ -18,6 +18,7 @@ import re
 
 # Enums for constrained choices
 
+
 class LayerType(str, Enum):
     """Board layer types following KiCad naming conventions."""
 
@@ -50,6 +51,7 @@ class SeverityLevel(str, Enum):
 
 
 # Input Schemas
+
 
 class PlaceComponentInput(BaseModel):
     """
@@ -89,19 +91,19 @@ class PlaceComponentInput(BaseModel):
         examples=[0.0, 90.0, 180.0, 270.0],
     )
 
-    @field_validator('reference')
+    @field_validator("reference")
     @classmethod
     def validate_reference(cls, v: str) -> str:
         """Validate component reference format."""
         # Standard pattern: Letters followed by numbers (e.g., R1, U10, C22)
-        pattern = r'^[A-Z]+\d+$'
+        pattern = r"^[A-Z]+\d+$"
         if not re.match(pattern, v, re.IGNORECASE):
             raise ValueError(
                 f"Invalid reference '{v}'. Must match pattern like 'R1', 'U10', 'C5'"
             )
         return v.upper()
 
-    @field_validator('rotation_deg')
+    @field_validator("rotation_deg")
     @classmethod
     def validate_rotation(cls, v: float) -> float:
         """Ensure rotation is in standard angles."""
@@ -157,7 +159,7 @@ class ExportGerberInput(BaseModel):
         description="Create Gerber job file (.gbrjob)",
     )
 
-    @field_validator('output_dir')
+    @field_validator("output_dir")
     @classmethod
     def validate_output_dir(cls, v: str) -> str:
         """Validate and normalize output directory path."""
@@ -180,18 +182,22 @@ class ExportGerberInput(BaseModel):
 
         return str(path)
 
-    @field_validator('layers')
+    @field_validator("layers")
     @classmethod
     def validate_layers(cls, v: Optional[List[str]]) -> Optional[List[str]]:
         """Validate layer names if provided."""
         if v is not None:
             valid_patterns = [
-                r'^F\.Cu$', r'^B\.Cu$',
-                r'^F\.SilkS$', r'^B\.SilkS$',
-                r'^F\.Mask$', r'^B\.Mask$',
-                r'^F\.Paste$', r'^B\.Paste$',
-                r'^Edge\.Cuts$',
-                r'^In\d+\.Cu$',  # Internal layers
+                r"^F\.Cu$",
+                r"^B\.Cu$",
+                r"^F\.SilkS$",
+                r"^B\.SilkS$",
+                r"^F\.Mask$",
+                r"^B\.Mask$",
+                r"^F\.Paste$",
+                r"^B\.Paste$",
+                r"^Edge\.Cuts$",
+                r"^In\d+\.Cu$",  # Internal layers
             ]
 
             for layer in v:
@@ -218,7 +224,7 @@ class ExportDrillInput(BaseModel):
         description="Merge plated (PTH) and non-plated (NPTH) holes into one file",
     )
 
-    @field_validator('output_dir')
+    @field_validator("output_dir")
     @classmethod
     def validate_output_dir(cls, v: str) -> str:
         """Validate output directory."""
@@ -242,7 +248,7 @@ class ExportFabricationPackageInput(BaseModel):
         description="Manufacturer preset for naming conventions and file organization",
     )
 
-    @field_validator('output_dir')
+    @field_validator("output_dir")
     @classmethod
     def validate_output_dir(cls, v: str) -> str:
         """Validate output directory."""
@@ -261,23 +267,21 @@ class ExportBOMInput(BaseModel):
         examples=["./bom.csv", "/tmp/project_bom.csv"],
     )
 
-    @field_validator('output_file')
+    @field_validator("output_file")
     @classmethod
     def validate_output_file(cls, v: str) -> str:
         """Validate output file path."""
         path = Path(v).expanduser()
 
         # Check extension
-        if path.suffix.lower() != '.csv':
+        if path.suffix.lower() != ".csv":
             raise ValueError(
                 f"Output file must have .csv extension, got: {path.suffix}"
             )
 
         # Check parent directory exists
         if not path.parent.exists():
-            raise ValueError(
-                f"Parent directory does not exist: {path.parent}"
-            )
+            raise ValueError(f"Parent directory does not exist: {path.parent}")
 
         return str(path)
 
@@ -291,21 +295,19 @@ class ExportPositionInput(BaseModel):
         examples=["./positions.csv", "/tmp/project_positions.csv"],
     )
 
-    @field_validator('output_file')
+    @field_validator("output_file")
     @classmethod
     def validate_output_file(cls, v: str) -> str:
         """Validate output file path."""
         path = Path(v).expanduser()
 
-        if path.suffix.lower() != '.csv':
+        if path.suffix.lower() != ".csv":
             raise ValueError(
                 f"Output file must have .csv extension, got: {path.suffix}"
             )
 
         if not path.parent.exists():
-            raise ValueError(
-                f"Parent directory does not exist: {path.parent}"
-            )
+            raise ValueError(f"Parent directory does not exist: {path.parent}")
 
         return str(path)
 
@@ -328,7 +330,7 @@ class FillZonesInput(BaseModel):
         examples=[["GND", "VCC"], None],
     )
 
-    @field_validator('zone_names')
+    @field_validator("zone_names")
     @classmethod
     def validate_zone_names(cls, v: Optional[List[str]]) -> Optional[List[str]]:
         """Validate zone names if provided."""
@@ -351,6 +353,7 @@ class GetTrackInfoInput(BaseModel):
 
 # Output Schemas
 
+
 class ComponentInfo(BaseModel):
     """Schema for component information."""
 
@@ -366,28 +369,19 @@ class ComponentInfo(BaseModel):
 class OperationResponse(BaseModel):
     """Standard response for all operations."""
 
-    status: str = Field(
-        description="Operation status (success, error, mock)"
-    )
-    message: Optional[str] = Field(
-        default=None,
-        description="Human-readable message"
-    )
+    status: str = Field(description="Operation status (success, error, mock)")
+    message: Optional[str] = Field(default=None, description="Human-readable message")
     data: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Operation-specific data"
+        default=None, description="Operation-specific data"
     )
     warnings: List[str] = Field(
-        default_factory=list,
-        description="Non-critical warnings"
+        default_factory=list, description="Non-critical warnings"
     )
     duration_ms: Optional[float] = Field(
-        default=None,
-        description="Operation duration in milliseconds"
+        default=None, description="Operation duration in milliseconds"
     )
     visual_diff_url: Optional[str] = Field(
-        default=None,
-        description="URL to visual diff image if available"
+        default=None, description="URL to visual diff image if available"
     )
 
 
@@ -395,8 +389,12 @@ class ErrorResponse(BaseModel):
     """Schema for error responses."""
 
     error: str = Field(description="Error message")
-    error_code: Optional[str] = Field(default=None, description="Machine-readable error code")
+    error_code: Optional[str] = Field(
+        default=None, description="Machine-readable error code"
+    )
     severity: Optional[str] = Field(default=None, description="Error severity")
-    remediation_steps: List[str] = Field(default_factory=list, description="Steps to resolve")
+    remediation_steps: List[str] = Field(
+        default_factory=list, description="Steps to resolve"
+    )
     context: Dict[str, Any] = Field(default_factory=dict, description="Error context")
     can_retry: bool = Field(default=False, description="Whether retry might succeed")

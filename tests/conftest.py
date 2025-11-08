@@ -36,7 +36,7 @@ def mock_pcbnew():
     mock_module.F_Cu = 0
     mock_module.B_Cu = 31
 
-    with patch.dict(sys.modules, {'pcbnew': mock_module}):
+    with patch.dict(sys.modules, {"pcbnew": mock_module}):
         yield mock_module
 
 
@@ -93,7 +93,7 @@ def mock_footprint():
     fp = MagicMock()
     fp.GetReference.return_value = "R1"
     fp.GetValue.return_value = "10k"
-    fp.GetPosition.return_value = MagicMock(x=10*1e6, y=20*1e6)  # nm
+    fp.GetPosition.return_value = MagicMock(x=10 * 1e6, y=20 * 1e6)  # nm
     fp.GetOrientationDegrees.return_value = 0.0
     fp.GetLayerName.return_value = "F.Cu"
     fp.GetLayer.return_value = 0  # F_Cu
@@ -124,8 +124,8 @@ def temp_board_file(tmp_path):
         "    (thickness 1.6)\n"
         "  )\n"
         "  (layers\n"
-        "    (0 \"F.Cu\" signal)\n"
-        "    (31 \"B.Cu\" signal)\n"
+        '    (0 "F.Cu" signal)\n'
+        '    (31 "B.Cu" signal)\n'
         "  )\n"
         ")\n"
     )
@@ -203,6 +203,7 @@ def reset_singletons(monkeypatch):
 
     # Reset settings singleton
     from mcp_kicad import config
+
     config._settings = None
 
     yield
@@ -226,7 +227,7 @@ def sample_components():
             "x_mm": 10.0,
             "y_mm": 20.0,
             "rotation_deg": 0.0,
-            "layer": "F.Cu"
+            "layer": "F.Cu",
         },
         {
             "reference": "C1",
@@ -234,7 +235,7 @@ def sample_components():
             "x_mm": 20.0,
             "y_mm": 20.0,
             "rotation_deg": 90.0,
-            "layer": "F.Cu"
+            "layer": "F.Cu",
         },
         {
             "reference": "U1",
@@ -242,7 +243,7 @@ def sample_components():
             "x_mm": 30.0,
             "y_mm": 30.0,
             "rotation_deg": 0.0,
-            "layer": "F.Cu"
+            "layer": "F.Cu",
         },
     ]
 

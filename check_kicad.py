@@ -27,10 +27,7 @@ def check_kicad_installed():
 
     try:
         result = subprocess.run(
-            ["which", "kicad"],
-            capture_output=True,
-            text=True,
-            check=False
+            ["which", "kicad"], capture_output=True, text=True, check=False
         )
 
         if result.returncode == 0:
@@ -51,20 +48,23 @@ def check_flatpak_kicad():
 
     try:
         result = subprocess.run(
-            ["flatpak", "list"],
-            capture_output=True,
-            text=True,
-            check=False
+            ["flatpak", "list"], capture_output=True, text=True, check=False
         )
 
         if result.returncode == 0 and "org.kicad.KiCad" in result.stdout:
             # Get version
             version_result = subprocess.run(
-                ["flatpak", "run", "--command=python3", "org.kicad.KiCad",
-                 "-c", "import pcbnew; print(pcbnew.GetBuildVersion())"],
+                [
+                    "flatpak",
+                    "run",
+                    "--command=python3",
+                    "org.kicad.KiCad",
+                    "-c",
+                    "import pcbnew; print(pcbnew.GetBuildVersion())",
+                ],
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             )
 
             if version_result.returncode == 0:
@@ -95,11 +95,17 @@ def check_flatpak_dependencies():
     for dep in deps:
         try:
             result = subprocess.run(
-                ["flatpak", "run", "--command=python3", "org.kicad.KiCad",
-                 "-c", f"import {dep}"],
+                [
+                    "flatpak",
+                    "run",
+                    "--command=python3",
+                    "org.kicad.KiCad",
+                    "-c",
+                    f"import {dep}",
+                ],
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
             )
 
             mod_name = "python-dotenv" if dep == "dotenv" else dep
@@ -126,6 +132,7 @@ def check_pcbnew_module():
 
     try:
         import pcbnew
+
         print(f"✓ pcbnew module available")
         print(f"  Module path: {pcbnew.__file__}")
 

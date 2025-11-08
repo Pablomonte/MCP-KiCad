@@ -23,6 +23,7 @@ from mcp_kicad.exceptions import (
 # BASE EXCEPTION TESTS
 # ============================================================================
 
+
 def test_base_exception_creation():
     """Test base KiCadMCPError creation"""
     error = KiCadMCPError(
@@ -57,7 +58,9 @@ def test_base_exception_to_dict():
 
 def test_error_code_generation():
     """Test automatic error code generation"""
-    error = KiCadMCPError(message="Test", severity=ErrorSeverity.LOW, remediation_steps=[])
+    error = KiCadMCPError(
+        message="Test", severity=ErrorSeverity.LOW, remediation_steps=[]
+    )
 
     assert error.error_code is not None
     assert isinstance(error.error_code, str)
@@ -67,6 +70,7 @@ def test_error_code_generation():
 # ============================================================================
 # BOARD EXCEPTIONS
 # ============================================================================
+
 
 def test_board_not_open_error():
     """Test BoardNotOpenError creation"""
@@ -90,6 +94,7 @@ def test_board_not_open_error_serialization():
 # ============================================================================
 # COMPONENT EXCEPTIONS
 # ============================================================================
+
 
 def test_component_not_found_error():
     """Test ComponentNotFoundError without suggestions"""
@@ -122,6 +127,7 @@ def test_component_not_found_serialization():
 # VALIDATION EXCEPTIONS
 # ============================================================================
 
+
 def test_invalid_coordinate_error():
     """Test InvalidCoordinateError"""
     board_bounds = {"width": 100.0, "height": 80.0}
@@ -151,6 +157,7 @@ def test_invalid_rotation_error_with_autofix():
 # EXPORT EXCEPTIONS
 # ============================================================================
 
+
 def test_export_error():
     """Test ExportError creation"""
     error = ExportError(
@@ -174,6 +181,7 @@ def test_export_error_serialization():
 # ============================================================================
 # DRC EXCEPTIONS
 # ============================================================================
+
 
 def test_drc_error():
     """Test DRCError creation"""
@@ -204,6 +212,7 @@ def test_drc_error_with_violations():
 # API EXCEPTIONS
 # ============================================================================
 
+
 def test_kicad_api_error():
     """Test KiCadAPIError creation"""
     error = KiCadAPIError(
@@ -227,6 +236,7 @@ def test_kicad_api_error_retry_flag():
 # ============================================================================
 # ERROR SEVERITY TESTS
 # ============================================================================
+
 
 def test_error_severity_enum():
     """Test ErrorSeverity enum values"""
@@ -252,6 +262,7 @@ def test_error_severity_ordering():
 # REMEDIATION STEPS TESTS
 # ============================================================================
 
+
 def test_remediation_steps_not_empty():
     """Test that critical errors have remediation steps"""
     errors = [
@@ -261,7 +272,9 @@ def test_remediation_steps_not_empty():
     ]
 
     for error in errors:
-        assert len(error.remediation_steps) > 0, f"{type(error).__name__} has no remediation steps"
+        assert (
+            len(error.remediation_steps) > 0
+        ), f"{type(error).__name__} has no remediation steps"
 
 
 def test_remediation_steps_are_actionable():
@@ -278,12 +291,11 @@ def test_remediation_steps_are_actionable():
 # CONTEXT PRESERVATION TESTS
 # ============================================================================
 
+
 def test_exception_context_preserved():
     """Test that context is preserved through exception chain"""
     error = KiCadAPIError(
-        operation="test_op",
-        original_error="Failed",
-        kicad_version="9.0"
+        operation="test_op", original_error="Failed", kicad_version="9.0"
     )
 
     # KiCadAPIError sets its own context
