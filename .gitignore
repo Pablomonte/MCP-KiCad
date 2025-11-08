@@ -50,7 +50,6 @@ actions.py
 api_adapter.py
 context_manager*.py
 test_api_adapter.py
-tests/
 
 # OS
 .DS_Store

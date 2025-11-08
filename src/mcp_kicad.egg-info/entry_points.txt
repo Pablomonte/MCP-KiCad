@@ -1,0 +1,4 @@
+[console_scripts]
+mcp-kicad = mcp_kicad.server.extended:main
+mcp-kicad-basic = mcp_kicad.server.basic:main
+mcp-kicad-client = mcp_kicad.client.claude:main

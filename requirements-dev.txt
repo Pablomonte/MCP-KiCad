@@ -1,0 +1,12 @@
+# Development dependencies
+black>=24.8.0
+flake8>=7.1.0
+mypy>=1.11.0
+pytest>=8.0.0
+pytest-cov>=5.0.0
+pytest-asyncio>=0.23.0
+pre-commit>=3.8.0
+safety>=3.0.0
+
+# Include production requirements
+-r requirements.txt

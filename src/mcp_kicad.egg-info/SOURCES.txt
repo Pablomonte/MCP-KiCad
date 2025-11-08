@@ -1,0 +1,17 @@
+LICENSE
+README.md
+pyproject.toml
+src/mcp_kicad/__init__.py
+src/mcp_kicad/config.py
+src/mcp_kicad/exceptions.py
+src/mcp_kicad/log.py
+src/mcp_kicad.egg-info/PKG-INFO
+src/mcp_kicad.egg-info/SOURCES.txt
+src/mcp_kicad.egg-info/dependency_links.txt
+src/mcp_kicad.egg-info/entry_points.txt
+src/mcp_kicad.egg-info/requires.txt
+src/mcp_kicad.egg-info/top_level.txt
+tests/test_fabrication.py
+tests/test_real_board.py
+tests/test_server.py
+tests/test_server_real.py
