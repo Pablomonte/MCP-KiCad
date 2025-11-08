@@ -27,22 +27,30 @@ class KiCadAIClient:
     async def connect_to_server(self, server_script_path: str):
         """Connect to the MCP server"""
 
-        # Setup server parameters
+        # Setup server parameters - use flatpak to access pcbnew
         server_params = StdioServerParameters(
-            command="python3",
-            args=[server_script_path],
-            env=None
+            command="flatpak",
+            args=[
+                "run",
+                "--command=python3",
+                "--filesystem=home",
+                "org.kicad.KiCad",
+                server_script_path,
+            ],
+            env=None,
         )
 
-        # Connect using stdio
-        stdio_transport = await stdio_client(server_params)
+        # Connect using stdio - use async with for context manager
+        self.stdio_context = stdio_client(server_params)
+        stdio_transport = await self.stdio_context.__aenter__()
         self.stdio, self.write = stdio_transport
 
-        # Create session
+        # Create session - use async with for context manager
         self.session = ClientSession(self.stdio, self.write)
-
-        # Initialize session
         await self.session.__aenter__()
+
+        # Initialize the session with MCP handshake
+        await self.session.initialize()
 
         # List available tools from server
         tools_result = await self.session.list_tools()
@@ -50,14 +58,18 @@ class KiCadAIClient:
         # Convert MCP tools to Claude format
         self.available_tools = []
         for tool in tools_result.tools:
-            self.available_tools.append({
-                "name": tool.name,
-                "description": tool.description,
-                "input_schema": tool.inputSchema
-            })
+            self.available_tools.append(
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "input_schema": tool.inputSchema,
+                }
+            )
 
         print(f"Connected to KiCad MCP Server")
-        print(f"Available tools: {', '.join(t['name'] for t in self.available_tools)}\n")
+        print(
+            f"Available tools: {', '.join(t['name'] for t in self.available_tools)}\n"
+        )
 
     async def call_tool(self, tool_name: str, tool_arguments: Dict[str, Any]) -> str:
         """Call a tool on the MCP server"""
@@ -76,26 +88,20 @@ class KiCadAIClient:
         """Send a message to Claude and handle tool calls"""
 
         # Add user message to history
-        self.conversation_history.append({
-            "role": "user",
-            "content": user_message
-        })
+        self.conversation_history.append({"role": "user", "content": user_message})
 
         # Initial request to Claude
         response = self.client.messages.create(
-            model="claude-3-5-sonnet-20241022",
+            model="claude-sonnet-4-5-20250929",
             max_tokens=4096,
             tools=self.available_tools,
-            messages=self.conversation_history
+            messages=self.conversation_history,
         )
 
         # Process response and handle tool calls
         while response.stop_reason == "tool_use":
             # Extract assistant message with tool calls
-            assistant_message = {
-                "role": "assistant",
-                "content": response.content
-            }
+            assistant_message = {"role": "assistant", "content": response.content}
             self.conversation_history.append(assistant_message)
 
             # Process each tool call
@@ -114,41 +120,39 @@ class KiCadAIClient:
                         result_text = await self.call_tool(tool_name, tool_input)
                         print(f"Result: {result_text}\n")
 
-                        tool_results.append({
-                            "type": "tool_result",
-                            "tool_use_id": tool_use_id,
-                            "content": result_text
-                        })
+                        tool_results.append(
+                            {
+                                "type": "tool_result",
+                                "tool_use_id": tool_use_id,
+                                "content": result_text,
+                            }
+                        )
                     except Exception as e:
                         error_msg = f"Error calling tool: {str(e)}"
                         print(f"Error: {error_msg}\n")
 
-                        tool_results.append({
-                            "type": "tool_result",
-                            "tool_use_id": tool_use_id,
-                            "content": json.dumps({"error": error_msg}),
-                            "is_error": True
-                        })
+                        tool_results.append(
+                            {
+                                "type": "tool_result",
+                                "tool_use_id": tool_use_id,
+                                "content": json.dumps({"error": error_msg}),
+                                "is_error": True,
+                            }
+                        )
 
             # Add tool results to conversation
-            self.conversation_history.append({
-                "role": "user",
-                "content": tool_results
-            })
+            self.conversation_history.append({"role": "user", "content": tool_results})
 
             # Get next response from Claude
             response = self.client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-sonnet-4-5-20250929",
                 max_tokens=4096,
                 tools=self.available_tools,
-                messages=self.conversation_history
+                messages=self.conversation_history,
             )
 
         # Final response without tool calls
-        assistant_message = {
-            "role": "assistant",
-            "content": response.content
-        }
+        assistant_message = {"role": "assistant", "content": response.content}
         self.conversation_history.append(assistant_message)
 
         # Extract text response
