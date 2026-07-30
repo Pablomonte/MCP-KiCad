@@ -7,12 +7,11 @@
 # home directory so the server can read/write PCB files.
 #
 # Usage:
-#   ./run_with_flatpak.sh [server_script]
+#   ./run_with_flatpak.sh [extended|basic]
 #
 # Examples:
-#   ./run_with_flatpak.sh                           # Uses extended server by default
-#   ./run_with_flatpak.sh kicad_mcp_server.py      # Use basic server
-#   ./run_with_flatpak.sh kicad_mcp_server_extended.py  # Use extended server
+#   ./run_with_flatpak.sh           # Uses extended server by default
+#   ./run_with_flatpak.sh basic     # Uses the four-tool basic server
 #
 
 set -e  # Exit on error
@@ -20,18 +19,21 @@ set -e  # Exit on error
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Determine which server to run
-SERVER_SCRIPT="${1:-kicad_mcp_server_extended.py}"
-
-# Check if the server script exists
-if [ ! -f "$SCRIPT_DIR/$SERVER_SCRIPT" ]; then
-    echo "Error: Server script not found: $SCRIPT_DIR/$SERVER_SCRIPT"
-    echo ""
-    echo "Available servers:"
-    echo "  - kicad_mcp_server.py (basic - 4 tools)"
-    echo "  - kicad_mcp_server_extended.py (extended - 12 tools, recommended)"
-    exit 1
-fi
+# Determine which packaged server module to run.
+SERVER_VARIANT="${1:-extended}"
+case "$SERVER_VARIANT" in
+    extended)
+        SERVER_MODULE="mcp_kicad.server.extended"
+        ;;
+    basic)
+        SERVER_MODULE="mcp_kicad.server.basic"
+        ;;
+    *)
+        echo "Error: Unknown server variant: $SERVER_VARIANT"
+        echo "Choose 'extended' or 'basic'."
+        exit 1
+        ;;
+esac
 
 # Check if Flatpak KiCad is installed
 if ! flatpak list | grep -q org.kicad.KiCad; then
@@ -59,7 +61,7 @@ fi
 echo "=========================================="
 echo "KiCad MCP Server - Flatpak Mode"
 echo "=========================================="
-echo "Server: $SERVER_SCRIPT"
+echo "Server: $SERVER_MODULE"
 echo "Working directory: $SCRIPT_DIR"
 echo ""
 echo "Starting server..."
@@ -69,5 +71,6 @@ echo ""
 flatpak run \
     --command=python3 \
     --filesystem=home \
+    --env=PYTHONPATH="$SCRIPT_DIR/src" \
     org.kicad.KiCad \
-    "$SCRIPT_DIR/$SERVER_SCRIPT"
+    -m "$SERVER_MODULE"

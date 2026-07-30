@@ -4,7 +4,7 @@ Complete guide for using KiCad MCP Server Extended fabrication tools.
 
 ## Overview
 
-The extended MCP server (`kicad_mcp_server_extended.py`) provides AI-powered tools for generating PCB fabrication files, running design verification, and managing board layout.
+The extended MCP server (`mcp-kicad`) provides AI-powered tools for generating PCB fabrication files, running design verification, and managing board layout.
 
 ## KiCad 9.x Compatibility
 
@@ -82,7 +82,7 @@ For API reference, see: https://docs.kicad.org/doxygen-python/namespacepcbnew.ht
 ./run_with_flatpak.sh
 
 # Native installation
-python kicad_mcp_server_extended.py
+mcp-kicad
 ```
 
 The client automatically detects which server is running.
@@ -664,14 +664,14 @@ AI: "Your board is ready! Here's what I did:
 
 Two test scripts are provided to verify functionality with real KiCad boards:
 
-#### test_real_board.py - Basic Board Loading
+#### `tests/manual_test_real_board.py` - Basic Board Loading
 
 Tests basic PCB loading and data extraction without MCP server overhead.
 
 ```bash
 # Run with Flatpak KiCad
 flatpak run --command=python3 --filesystem=home \
-  org.kicad.KiCad test_real_board.py
+  org.kicad.KiCad tests/manual_test_real_board.py /path/to/board.kicad_pcb
 ```
 
 **Tests:**
@@ -694,14 +694,15 @@ flatpak run --command=python3 --filesystem=home \
 ✓ ALL TESTS PASSED
 ```
 
-#### test_server_real.py - Full Server Testing
+#### `tests/manual_test_server_real.py` - Full Server Testing
 
 Tests all MCP server extended tools with a real board.
 
 ```bash
 # Run with Flatpak KiCad
 flatpak run --command=python3 --filesystem=home \
-  org.kicad.KiCad test_server_real.py
+  --env=PYTHONPATH="$PWD/src" \
+  org.kicad.KiCad tests/manual_test_server_real.py /path/to/board.kicad_pcb
 ```
 
 **Tests:**
@@ -724,12 +725,9 @@ flatpak run --command=python3 --filesystem=home \
 
 ### Test Board
 
-Tests use the Olivia Control v0.2 board by default:
-- **Location:** `/home/pablo/repos/Proyecto-Incubadora/HardWare/Electro/Olivia_control/v0.2/v0.2.kicad_pcb`
-- **Specs:** 51 components, 90x100mm, 2 layers, 56 nets, 38 vias
-- **Complexity:** Mixed SMD/through-hole, representative of real projects
-
-To test with your own board, edit the `BOARD_PATH` variable in the test scripts.
+The manual integration tests require a real `.kicad_pcb` file. Set `BOARD_PATH`
+in the manual test you run; no project-specific board is bundled in this
+repository.
 
 ### Expected Warnings
 
@@ -752,14 +750,14 @@ Run tests before releasing changes:
 
 ```bash
 # Quick test (basic board loading)
-flatpak run --command=python3 --filesystem=home org.kicad.KiCad test_real_board.py
+flatpak run --command=python3 --filesystem=home org.kicad.KiCad tests/manual_test_real_board.py
 
 # Full test (all server tools)
-flatpak run --command=python3 --filesystem=home org.kicad.KiCad test_server_real.py
+flatpak run --command=python3 --filesystem=home org.kicad.KiCad tests/manual_test_server_real.py
 
 # Mock mode tests (no KiCad needed)
-python test_server.py          # Basic server (4 tools)
-python test_fabrication.py     # Extended server (12 tools)
+pytest tests/test_server.py
+pytest tests/test_fabrication.py
 ```
 
 All tests should pass for a healthy installation.
@@ -767,9 +765,7 @@ All tests should pass for a healthy installation.
 ## See Also
 
 - [README.md](README.md) - Main documentation
-- [QUICKSTART.md](QUICKSTART.md) - Getting started guide
-- [EXAMPLES.md](EXAMPLES.md) - Usage examples
-- [STANDALONE_FABRICATION.md](STANDALONE_FABRICATION.md) - Direct script usage
+- [Implementation pattern](docs/IMPLEMENTATION_PATTERN.md) - Server conventions
 - [KiCad Documentation](https://docs.kicad.org/) - Official KiCad docs
 
 ## Support

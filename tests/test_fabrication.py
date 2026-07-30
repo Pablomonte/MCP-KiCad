@@ -12,7 +12,6 @@ from pathlib import Path
 
 from mcp_kicad.server import KiCadMCPServerExtended
 
-
 # ============================================================================
 # BASIC TOOLS
 # ============================================================================

@@ -302,9 +302,7 @@ class KiCadMCPServer:
         )
 
         if circuit_type.lower() == "led":
-            return (
-                base_text
-                + """
+            return base_text + """
 Layout guidance for LED circuit:
 1. Place LED (D1 or similar) in a central location
 2. Place current-limiting resistor (R1) close to LED anode
@@ -316,11 +314,8 @@ Typical spacing:
 - LED to resistor: 5-10mm
 - Components to board edge: minimum 3mm
 """
-            )
         elif circuit_type.lower() in ["power_supply", "power"]:
-            return (
-                base_text
-                + """
+            return base_text + """
 Layout guidance for power supply:
 1. Place input connector on one edge
 2. Group filtering capacitors near voltage regulator
@@ -333,11 +328,8 @@ Critical spacing:
 - Output caps to load: < 15mm
 - Heatsink clearance: check datasheet
 """
-            )
         else:
-            return (
-                base_text
-                + f"""
+            return base_text + f"""
 Layout guidance for {circuit_type} circuit:
 1. Group related components together
 2. Place connectors on board edges
@@ -351,7 +343,6 @@ Standard practices:
 - Components to board edge: > 3mm
 - High-frequency components: minimize trace length
 """
-            )
 
     async def _place_component(
         self, reference: str, x_mm: float, y_mm: float, rotation_deg: float = 0
@@ -582,11 +573,19 @@ Standard practices:
             )
 
 
-async def main():
-    """Main entry point"""
+async def _run_server() -> None:
+    """Run the basic server event loop."""
     server = KiCadMCPServer()
     await server.run()
 
 
+def main() -> None:
+    """Console entry point."""
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("usage: mcp-kicad-basic\n\nRun the basic KiCad MCP server over stdio.")
+        return
+    asyncio.run(_run_server())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

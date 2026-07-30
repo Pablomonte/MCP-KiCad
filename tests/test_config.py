@@ -13,7 +13,6 @@ from pathlib import Path
 from pydantic import ValidationError
 from mcp_kicad.config import Settings, get_settings, reload_settings
 
-
 # ============================================================================
 # BASIC SETTINGS TESTS
 # ============================================================================

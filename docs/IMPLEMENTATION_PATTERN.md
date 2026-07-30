@@ -328,7 +328,7 @@ async def _export_gerber(
 
 ## Methods Needing Pattern Application
 
-In [extended.py](src/mcp_kicad/server/extended.py), these methods have validation but need full operation context integration:
+In [extended.py](../src/mcp_kicad/server/extended.py), these methods have validation but need full operation context integration:
 
 1. ✅ `_place_component` - **COMPLETE** (shown above)
 2. ❌ `_export_gerber` - Needs operation context

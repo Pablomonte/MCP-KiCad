@@ -32,10 +32,10 @@ source venv/bin/activate
 echo "Upgrading pip..."
 pip install --upgrade pip -q
 
-# Install dependencies
-echo "Installing dependencies..."
-pip install -r requirements.txt -q
-echo "✓ Dependencies installed"
+# Install the package and development dependencies
+echo "Installing package and development dependencies..."
+pip install -e ".[dev]" -q
+echo "✓ Package installed"
 
 # Create .env if it doesn't exist
 if [ -f ".env" ]; then
@@ -51,7 +51,7 @@ fi
 
 # Make scripts executable
 echo "Making scripts executable..."
-chmod +x kicad_mcp_server.py kicad_mcp_client.py test_server.py check_kicad.py
+chmod +x check_kicad.py run_with_flatpak.sh kicad_flatpak_setup.sh
 
 # Run environment check
 echo
@@ -73,12 +73,12 @@ echo "   nano .env"
 echo
 echo "2. Test in mock mode:"
 echo "   source venv/bin/activate"
-echo "   python test_server.py"
+echo "   pytest"
 echo
 echo "3. Or use with KiCad:"
 echo "   - Open a PCB in KiCad PCBNew"
-echo "   - Terminal 1: python kicad_mcp_server.py"
-echo "   - Terminal 2: python kicad_mcp_client.py kicad_mcp_server.py"
+echo "   - Terminal 1: ./run_with_flatpak.sh"
+echo "   - Terminal 2: mcp-kicad-client ./run_with_flatpak.sh"
 echo
 echo "See README.md for full documentation"
 echo

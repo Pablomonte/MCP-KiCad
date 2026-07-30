@@ -827,23 +827,17 @@ class KiCadMCPServerExtended:
         base = f"Components:\n{json.dumps(components, indent=2)}\n\n"
 
         if circuit_type.lower() == "led":
-            return (
-                base
-                + """Layout guidance for LED circuit:
+            return base + """Layout guidance for LED circuit:
 1. Place LED centrally
 2. Place resistor near LED anode
 3. Keep traces short
 4. Min 3mm from board edge"""
-            )
         else:
-            return (
-                base
-                + f"""Layout guidance for {circuit_type}:
+            return base + f"""Layout guidance for {circuit_type}:
 1. Group related components
 2. Place connectors on edges
 3. Keep signal paths short
 4. Decoupling caps near ICs (< 5mm)"""
-            )
 
     # ============================================================================
     # FABRICATION TOOLS
@@ -1686,11 +1680,19 @@ Use the export_fabrication_package tool to generate all required files automatic
             )
 
 
-async def main():
-    """Main entry point"""
+async def _run_server() -> None:
+    """Run the extended server event loop."""
     server = KiCadMCPServerExtended()
     await server.run()
 
 
+def main() -> None:
+    """Console entry point."""
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print("usage: mcp-kicad\n\nRun the extended KiCad MCP server over stdio.")
+        return
+    asyncio.run(_run_server())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

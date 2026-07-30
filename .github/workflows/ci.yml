@@ -51,7 +51,7 @@ jobs:
     - name: Type check with mypy
       run: |
         # Run mypy, allowing some flexibility for the initial setup
-        mypy --ignore-missing-imports --no-strict-optional kicad_mcp_server.py kicad_mcp_server_extended.py kicad_mcp_client.py || true
+        mypy --ignore-missing-imports --no-strict-optional src/mcp_kicad || true
       continue-on-error: true  # Don't fail build on type errors initially
 
     - name: Run tests with pytest
@@ -94,3 +94,30 @@ jobs:
         pip install -r requirements.txt
         safety check --json || true
       continue-on-error: true
+
+  wheel-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Build wheel
+      run: |
+        python -m pip install --upgrade pip build
+        python -m build --wheel
+
+    - name: Install wheel in a clean environment
+      run: |
+        python -m venv .wheel-venv
+        .wheel-venv/bin/python -m pip install --upgrade pip
+        .wheel-venv/bin/python -m pip install dist/*.whl
+
+    - name: Load installed console entry points
+      run: |
+        .wheel-venv/bin/python scripts/smoke_test_entry_points.py

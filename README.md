@@ -45,6 +45,31 @@ This project provides an MCP server that exposes KiCad PCB design tools to AI as
 2. **Python 3.10+**
 3. **Anthropic API Key** (or xAI API key for Grok)
 
+## Quick Start
+
+```bash
+git clone https://github.com/Pablomonte/MCP-KiCad.git
+cd MCP-KiCad
+./setup.sh
+./kicad_flatpak_setup.sh
+```
+
+Open a board in KiCad, then start the packaged extended server and client:
+
+```bash
+# Terminal 1
+./run_with_flatpak.sh
+
+# Terminal 2, with the virtual environment activated
+mcp-kicad-client ./run_with_flatpak.sh
+```
+
+The server also works without `pcbnew` in mock mode:
+
+```bash
+mcp-kicad
+```
+
 ## Installation
 
 ### Method 1: Flatpak (Recommended)
@@ -93,7 +118,7 @@ Get your API key from: https://console.anthropic.com/
 Run the server using:
 
 ```bash
-./run_with_flatpak.sh  # Uses extended server (13 tools) by default
+./run_with_flatpak.sh  # Uses extended server (12 tools) by default
 ```
 
 ### Method 2: Native Python (Advanced)
@@ -133,13 +158,14 @@ Find and use KiCad's Python installation:
 
 ```bash
 # Linux
-/usr/lib/kicad/bin/python3 kicad_mcp_server_extended.py
+PYTHONPATH=src /usr/lib/kicad/bin/python3 -m mcp_kicad.server.extended
 
 # Mac
-/Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 kicad_mcp_server_extended.py
+PYTHONPATH=src /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3 -m mcp_kicad.server.extended
 
 # Windows
-"C:\Program Files\KiCad\9.0\bin\python.exe" kicad_mcp_server_extended.py
+set PYTHONPATH=src
+"C:\Program Files\KiCad\9.0\bin\python.exe" -m mcp_kicad.server.extended
 ```
 
 **Option B: Link pcbnew to Virtual Environment**
@@ -166,7 +192,7 @@ Make sure the PCB editor (PCBNew) is open, not just the project manager.
 
 ### 2. Run the MCP Server
 
-Choose between basic server (4 tools) or extended server (13 tools, recommended):
+Choose between basic server (4 tools) or extended server (12 tools, recommended):
 
 **With Flatpak (Recommended):**
 
@@ -175,7 +201,7 @@ Choose between basic server (4 tools) or extended server (13 tools, recommended)
 ./run_with_flatpak.sh
 
 # Basic server only
-./run_with_flatpak.sh kicad_mcp_server.py
+./run_with_flatpak.sh basic
 ```
 
 **With Native Python:**
@@ -183,10 +209,10 @@ Choose between basic server (4 tools) or extended server (13 tools, recommended)
 ```bash
 # If using virtual environment
 source venv/bin/activate
-python kicad_mcp_server_extended.py  # or kicad_mcp_server.py for basic
+mcp-kicad  # use mcp-kicad-basic for the basic server
 
 # Or with KiCad's Python
-/usr/lib/kicad/bin/python3 kicad_mcp_server_extended.py
+PYTHONPATH=src /usr/lib/kicad/bin/python3 -m mcp_kicad.server.extended
 ```
 
 The server will connect to the currently open KiCad board and wait for MCP requests.
@@ -195,10 +221,14 @@ The server will connect to the currently open KiCad board and wait for MCP reque
 
 ### 3. Run the Client
 
-In another terminal (with virtual environment activated):
+In another terminal, launch the client with the command that starts the server:
 
 ```bash
-python kicad_mcp_client.py kicad_mcp_server.py
+# Native installation
+mcp-kicad-client mcp-kicad
+
+# Flatpak installation
+mcp-kicad-client ./run_with_flatpak.sh
 ```
 
 You should see:
@@ -262,8 +292,8 @@ The project includes two MCP server variants:
 
 | Feature | Basic Server | Extended Server |
 |---------|-------------|----------------|
-| Script | `kicad_mcp_server.py` | `kicad_mcp_server_extended.py` |
-| Tool Count | 4 tools | 13 tools |
+| Entry point | `mcp-kicad-basic` | `mcp-kicad` |
+| Tool Count | 4 tools | 12 tools |
 | Use Case | Component placement & queries | Full fabrication workflow |
 | Recommended | Testing & learning | Production use |
 
@@ -295,7 +325,7 @@ Get general information about the PCB.
 
 **Returns**: Board size, layer count, component count, filename
 
-### Extended Server Additional Tools (9 more tools)
+### Extended Server Additional Tools (8 more tools)
 
 The extended server adds these fabrication and verification tools:
 
@@ -373,14 +403,6 @@ Get information about tracks/traces on the PCB.
 
 **Returns**: Track count, total length, layer distribution
 
-##### update_from_schematic
-Import/update components from schematic file to PCB board.
-
-**Parameters**:
-- `schematic_path` (string, optional): Path to .kicad_sch file (auto-detected if not provided)
-
-**Returns**: Status, component count, schematic and PCB file paths
-
 ## Available Resources
 
 ### board://schematic
@@ -411,7 +433,7 @@ MCP-KiCad/
 │       ├── __init__.py
 │       ├── server/
 │       │   ├── basic.py         # Basic MCP server (4 tools)
-│       │   └── extended.py      # Extended MCP server (13 tools)
+│       │   └── extended.py      # Extended MCP server (12 tools)
 │       ├── client/
 │       │   └── claude.py        # Claude AI client implementation
 │       └── schemas/
@@ -420,9 +442,8 @@ MCP-KiCad/
 │   ├── test_server.py          # Server unit tests
 │   ├── test_fabrication.py     # Fabrication tools tests
 │   └── ...                     # Additional test files
-├── kicad_mcp_server.py         # Basic server (legacy/direct)
-├── kicad_mcp_server_extended.py # Extended server (legacy/direct)
-├── kicad_mcp_client.py         # AI client (legacy/direct)
+├── scripts/
+│   └── smoke_test_entry_points.py
 ├── pyproject.toml              # Project configuration
 ├── requirements.txt            # Python dependencies
 ├── .env.example               # Example environment configuration
@@ -521,7 +542,7 @@ For more details, see [FABRICATION.md](FABRICATION.md#testing).
 To use Grok instead of Claude:
 
 1. Get an xAI API key from https://x.ai/
-2. Modify `kicad_mcp_client.py`:
+2. Adapt `src/mcp_kicad/client/claude.py`:
 
 ```python
 # Replace Anthropic client with xAI client
@@ -540,7 +561,7 @@ client = OpenAI(
 The MCP server can be used by any MCP-compatible client:
 
 ```bash
-python kicad_mcp_server.py
+mcp-kicad
 ```
 
 Then connect with any MCP client using stdio transport.
@@ -574,8 +595,8 @@ Example tools to add:
 Test without KiCad by running in mock mode:
 
 ```bash
-python kicad_mcp_server.py  # pcbnew not available → mock mode
-python kicad_mcp_client.py kicad_mcp_server.py
+mcp-kicad  # pcbnew not available → mock mode
+mcp-kicad-client mcp-kicad
 ```
 
 Mock mode returns simulated data for testing.
@@ -608,7 +629,7 @@ pip install -e .[dev]
 pytest
 
 # Run with coverage report
-pytest --cov=src/mcp_kicad --cov-report=term-missing
+pytest --cov=mcp_kicad --cov-report=term-missing
 
 # Run specific test files
 pytest tests/test_server.py

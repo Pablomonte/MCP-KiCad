@@ -29,8 +29,17 @@ ENV/
 # Testing
 .pytest_cache/
 .coverage
+coverage.xml
 htmlcov/
 .tox/
+
+# Build and packaging
+build/
+dist/
+*.egg-info/
+
+# Generated fabrication outputs
+fabrication_output/
 
 # Claude Code / AI Assistant
 .claude/

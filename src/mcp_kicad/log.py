@@ -18,7 +18,6 @@ from structlog.types import Processor
 
 from mcp_kicad.config import get_settings
 
-
 # Context variable for correlation ID
 correlation_id: ContextVar[Optional[str]] = ContextVar("correlation_id", default=None)
 operation_id: ContextVar[Optional[str]] = ContextVar("operation_id", default=None)

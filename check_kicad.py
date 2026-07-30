@@ -252,9 +252,7 @@ def main():
         print("  1. Open a PCB in KiCad PCBNew")
         print("  2. Terminal 1: ./run_with_flatpak.sh")
         print("  3. Terminal 2: source venv/bin/activate")
-        print("     python kicad_mcp_client.py kicad_mcp_server.py")
-        print("\nOr use the convenience launcher:")
-        print("  ./start_kicad_ai.sh  (if available)")
+        print("     mcp-kicad-client ./run_with_flatpak.sh")
 
     elif flatpak_found and not flatpak_deps_ok:
         print("\n⚠ KiCad Flatpak found but dependencies not installed")
@@ -267,8 +265,8 @@ def main():
         print("\n✓ Ready to use with KiCad (native installation)!")
         print("\nNext steps:")
         print("  1. Open a PCB in KiCad PCBNew")
-        print("  2. Run: python kicad_mcp_server.py")
-        print("  3. Run: python kicad_mcp_client.py kicad_mcp_server.py")
+        print("  2. Run: mcp-kicad")
+        print("  3. Run: mcp-kicad-client mcp-kicad")
 
     else:
         print("\n⚠ pcbnew not available - will run in MOCK MODE")
@@ -282,8 +280,8 @@ def main():
         if kicad_pythons:
             print(f"\nOption 2: Use KiCad's Python:")
             for kp in kicad_pythons:
-                print(f"   {kp} -m pip install mcp anthropic python-dotenv")
-                print(f"   {kp} kicad_mcp_server.py")
+                print(f"   {kp} -m pip install -e '.[dev]'")
+                print(f"   {kp} -m mcp_kicad.server.extended")
 
         if not flatpak_found:
             print("\nOption 3: Install KiCad via Flatpak:")
@@ -295,7 +293,7 @@ def main():
         print("  ln -s /path/to/pcbnew.py venv/lib/python3.*/site-packages/")
 
         print("\nOption 5: Test in mock mode:")
-        print("  python test_server.py")
+        print("  pytest")
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ KiCad MCP Client - AI assistant for KiCad PCB design using Anthropic Claude
 import asyncio
 import json
 import os
+import shutil
 import sys
 from typing import Optional, List, Dict, Any
 
@@ -24,12 +25,14 @@ class KiCadAIClient:
         self.available_tools: List[Dict[str, Any]] = []
         self.conversation_history: List[Dict[str, Any]] = []
 
-    async def connect_to_server(self, server_script_path: str):
+    async def connect_to_server(
+        self, server_command: str, server_args: Optional[List[str]] = None
+    ):
         """Connect to the MCP server"""
 
         # Setup server parameters
         server_params = StdioServerParameters(
-            command="python3", args=[server_script_path], env=None
+            command=server_command, args=server_args or [], env=None
         )
 
         # Connect using stdio
@@ -159,8 +162,8 @@ class KiCadAIClient:
             await self.session.__aexit__(None, None, None)
 
 
-async def main():
-    """Main entry point for the client"""
+async def _run_client():
+    """Run the interactive client."""
 
     # Load environment variables
     load_dotenv()
@@ -173,17 +176,13 @@ async def main():
         print("  ANTHROPIC_API_KEY=your_key_here")
         sys.exit(1)
 
-    # Get server script path
-    if len(sys.argv) < 2:
-        server_script = "kicad_mcp_server.py"
-        print(f"Using default server script: {server_script}")
-    else:
-        server_script = sys.argv[1]
-
-    # Verify server script exists
-    if not os.path.exists(server_script):
-        print(f"Error: Server script not found: {server_script}")
+    # Resolve the server command. Additional arguments are passed through.
+    server_command = sys.argv[1] if len(sys.argv) >= 2 else "mcp-kicad"
+    server_args = sys.argv[2:]
+    if shutil.which(server_command) is None and not os.path.isfile(server_command):
+        print(f"Error: Server command not found: {server_command}")
         sys.exit(1)
+    print(f"Using server command: {server_command}")
 
     # Create client
     client = KiCadAIClient(api_key)
@@ -191,7 +190,7 @@ async def main():
     try:
         # Connect to server
         print("Connecting to KiCad MCP Server...")
-        await client.connect_to_server(server_script)
+        await client.connect_to_server(server_command, server_args)
 
         # Print welcome message
         print("=" * 70)
@@ -236,5 +235,17 @@ async def main():
         await client.close()
 
 
+def main() -> None:
+    """Console entry point for the client."""
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print(
+            "usage: mcp-kicad-client [SERVER_COMMAND] [SERVER_ARGUMENT ...]\n\n"
+            "Start the Claude client and connect it to an MCP server command.\n"
+            "SERVER_COMMAND defaults to mcp-kicad."
+        )
+        return
+    asyncio.run(_run_client())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

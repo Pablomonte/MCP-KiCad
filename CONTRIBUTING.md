@@ -173,7 +173,7 @@ git checkout -b bugfix/fix-gerber-export
 
 # 3. Fix and test
 # ... make changes ...
-./venv/bin/python test_fabrication.py
+./venv/bin/pytest tests/test_fabrication.py
 
 # 4. Commit and push
 git add .
@@ -195,8 +195,7 @@ git checkout -b hotfix/critical-security-fix
 # ... make changes ...
 
 # 3. Test thoroughly
-./venv/bin/python test_fabrication.py
-./venv/bin/python test_server.py
+./venv/bin/pytest
 
 # 4. Commit
 git add .
@@ -233,13 +232,13 @@ git pull origin develop
 git checkout -b release/v1.1.0
 
 # 2. Bump version numbers
-# Edit PROJECT_STATUS.md, README.md, etc.
+# Edit pyproject.toml, README.md, etc.
 
 # 3. Update CHANGELOG
 # Add release notes
 
 # 4. Final testing
-./venv/bin/python test_fabrication.py
+./venv/bin/pytest
 # ... all tests ...
 
 # 5. Commit version bump
@@ -274,21 +273,20 @@ All contributions must include tests and pass existing tests.
 # Activate virtual environment
 source venv/bin/activate
 
-# Run basic tests
-python test_server.py
-
-# Run fabrication tests
-python test_fabrication.py
+# Run unit tests
+pytest tests/test_server.py
+pytest tests/test_fabrication.py
 
 # Run with KiCad integration
-flatpak run --command=python3 --filesystem=host org.kicad.KiCad test_fabrication.py
+flatpak run --command=python3 --filesystem=host org.kicad.KiCad \
+  tests/manual_test_server_real.py
 ```
 
 ### Test Coverage
 
 - New features: Must include tests
 - Bug fixes: Must include regression tests
-- Minimum coverage: 80% (aim for 100%)
+- Minimum coverage: 40%; increases should be accompanied by stable tests
 
 ## Code Style
 
@@ -414,16 +412,15 @@ cd MCP-KiCad
 python3 -m venv venv
 source venv/bin/activate
 
-# Install dependencies
-pip install -r requirements.txt
+# Install package and development dependencies
+pip install -e ".[dev]"
 
 # Configure environment
 cp .env.example .env
 nano .env  # Add ANTHROPIC_API_KEY
 
 # Run tests
-python test_server.py
-python test_fabrication.py
+pytest
 
 # Setup Flatpak (optional)
 ./kicad_flatpak_setup.sh

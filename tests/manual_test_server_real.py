@@ -7,9 +7,11 @@ This loads the Olivia v0.2 board and tests server functions.
 import sys
 import os
 import asyncio
+from pathlib import Path
 
-# Add current directory to path for imports
-sys.path.insert(0, os.path.dirname(__file__))
+# Make the src-layout package importable in KiCad's Python environment.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src"))
 
 # Test if pcbnew is available
 try:
@@ -19,21 +21,22 @@ try:
 except ImportError:
     print("✗ pcbnew not available - run with:")
     print(
-        "  flatpak run --command=python3 --filesystem=home org.kicad.KiCad test_server_real.py"
+        "  flatpak run --command=python3 --filesystem=home org.kicad.KiCad "
+        "tests/manual_test_server_real.py /path/to/board.kicad_pcb"
     )
     sys.exit(1)
 
 # Import server module
 try:
-    from kicad_mcp_server_extended import KiCadMCPServerExtended
+    from mcp_kicad.server.extended import KiCadMCPServerExtended
 
     print("✓ Server module imported")
 except ImportError as e:
     print(f"✗ Failed to import server: {e}")
     sys.exit(1)
 
-# Board path
-BOARD_PATH = "/home/pablo/repos/Proyecto-Incubadora/HardWare/Electro/Olivia_control/v0.2/v0.2.kicad_pcb"
+# Board path, supplied by argument or environment.
+BOARD_PATH = sys.argv[1] if len(sys.argv) > 1 else os.getenv("MCP_KICAD_TEST_BOARD", "")
 
 
 async def test_server_with_board():
@@ -44,7 +47,8 @@ async def test_server_with_board():
 
     # Load board
     if not os.path.exists(BOARD_PATH):
-        print(f"✗ Board not found: {BOARD_PATH}")
+        print(f"✗ Board not found: {BOARD_PATH or '<not provided>'}")
+        print("Pass a .kicad_pcb path or set MCP_KICAD_TEST_BOARD.")
         return False
 
     try:

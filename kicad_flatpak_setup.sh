@@ -83,11 +83,11 @@ echo "======================================================================"
 echo
 
 # Install required packages
-echo "Installing: mcp, anthropic, python-dotenv"
+echo "Installing: mcp 1.x, anthropic, python-dotenv"
 echo
 
 flatpak run --command=python3 "$FLATPAK_ID" -m pip install --user --upgrade \
-    mcp \
+    "mcp>=1.0.0,<2.0.0" \
     anthropic \
     python-dotenv
 
@@ -126,10 +126,7 @@ if [ "$ALL_OK" = true ]; then
     echo
     echo "4. In another terminal, run the client:"
     echo "   source venv/bin/activate"
-    echo "   python kicad_mcp_client.py <(./run_with_flatpak.sh)"
-    echo
-    echo "Or use the wrapper script (recommended):"
-    echo "   ./start_kicad_ai.sh"
+    echo "   mcp-kicad-client ./run_with_flatpak.sh"
 else
     echo -e "${RED}======================================================================"
     echo "Setup Failed"
@@ -137,6 +134,6 @@ else
     echo
     echo "Some packages failed to install."
     echo "Try installing manually:"
-    echo "  flatpak run --command=python3 $FLATPAK_ID -m pip install --user mcp anthropic python-dotenv"
+    echo "  flatpak run --command=python3 $FLATPAK_ID -m pip install --user 'mcp>=1,<2' anthropic python-dotenv"
     exit 1
 fi

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Discover all `mcp_kicad` subpackages when building wheels.
+- Add a clean-wheel CI smoke test for all three console entry points.
+- Remove the unavailable `update_from_schematic` tool, which called a
+  non-existent `kicad-cli pcb export update-from-sch` command.
+- Correct CI test paths and align the documented coverage threshold.
+
+### Changed
+
+- Make packaged console commands the canonical server and client launch path.
+- Consolidate quick-start and fabrication examples into the main documentation.
+- Stop tracking generated coverage, packaging and fabrication artifacts.
+
 ### Planned
 - Auto-routing support
 - Web UI for visual interaction
@@ -186,9 +200,8 @@ For existing installations:
 #### Documentation
 - `README.md` (11KB): Complete user guide
 - `FABRICATION.md` (13KB): Fabrication tools documentation
-- `QUICKSTART.md`: 5-minute setup guide
-- `PROJECT_STATUS.md`: Implementation summary
-- `SUMMARY.md`: Technical overview
+- Quick-start guide in `README.md`
+- Fabrication workflows in `FABRICATION.md`
 - `CONTRIBUTING.md`: Development guidelines
 
 #### Example Project

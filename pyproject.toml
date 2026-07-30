@@ -9,13 +9,12 @@ description = "MCP server for KiCad PCB design automation with fabrication suppo
 authors = [{name = "Pablo Monte", email = "pablobustos@gmail.com"}]
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 keywords = ["mcp", "kicad", "pcb", "eda", "automation", "fabrication", "ai"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Manufacturing",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -66,8 +65,11 @@ mcp-kicad-basic = "mcp_kicad.server.basic:main"
 mcp-kicad-client = "mcp_kicad.client.claude:main"
 
 [tool.setuptools]
-packages = ["mcp_kicad"]
 package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mcp_kicad*"]
 
 [tool.setuptools.package-data]
 mcp_kicad = ["py.typed"]
@@ -149,7 +151,7 @@ asyncio_mode = "auto"
 addopts = [
     "--strict-markers",
     "--strict-config",
-    "--cov=src/mcp_kicad",
+    "--cov=mcp_kicad",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -168,7 +170,7 @@ filterwarnings = [
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["src"]
+source = ["mcp_kicad"]
 omit = [
     "tests/*",
     "venv/*",

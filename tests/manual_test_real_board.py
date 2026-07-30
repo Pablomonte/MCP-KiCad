@@ -18,12 +18,13 @@ except ImportError as e:
     print(f"  Error: {e}")
     print("\nTo run this test:")
     print(
-        "  flatpak run --command=python3 --filesystem=home org.kicad.KiCad test_real_board.py"
+        "  flatpak run --command=python3 --filesystem=home org.kicad.KiCad "
+        "tests/manual_test_real_board.py /path/to/board.kicad_pcb"
     )
     sys.exit(1)
 
-# Path to test board
-BOARD_PATH = "/home/pablo/repos/Proyecto-Incubadora/HardWare/Electro/Olivia_control/v0.2/v0.2.kicad_pcb"
+# Path to test board, supplied by argument or environment.
+BOARD_PATH = sys.argv[1] if len(sys.argv) > 1 else os.getenv("MCP_KICAD_TEST_BOARD", "")
 
 
 def test_load_board():
@@ -33,7 +34,8 @@ def test_load_board():
     print("=" * 60)
 
     if not os.path.exists(BOARD_PATH):
-        print(f"✗ Board file not found: {BOARD_PATH}")
+        print(f"✗ Board file not found: {BOARD_PATH or '<not provided>'}")
+        print("Pass a .kicad_pcb path or set MCP_KICAD_TEST_BOARD.")
         return False
 
     try:
