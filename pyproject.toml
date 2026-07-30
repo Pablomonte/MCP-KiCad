@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-kicad"
-version = "1.0.0"
+version = "2.1.0"
 description = "MCP server for KiCad PCB design automation with fabrication support"
 authors = [{name = "Pablo Monte", email = "pablobustos@gmail.com"}]
 readme = "README.md"
